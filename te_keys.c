@@ -37,7 +37,8 @@
 GetKeyName(key)
 int key;
 {
-TRACE("GetKeyName");	switch(key)
+TRACE("GetKeyName");	
+	switch(key)
 	{
 		case K_CR:  return cf_cr_name;
 		case K_ESC: return cf_esc_name;

@@ -127,6 +127,10 @@ TRACE("ReadFile");
 				{
 					*p = ' '; ++tabs;
 				}
+				else if (ch == '\r')
+				{}	 // maybe filter return 
+				else if (ch == '\n')
+				{}	 // maybe filter newline 
 				else
 				{
 					*p = '?'; ++rare;

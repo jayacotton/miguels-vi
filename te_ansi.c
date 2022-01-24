@@ -46,7 +46,9 @@
 	It needs to translate some keyboard codes.
 */
 
-/* Default configuration values
+//int _bdos = 5;
+
+/*Default configuration values
    ----------------------------
 */
 #define CRT_DEF_ROWS 25
