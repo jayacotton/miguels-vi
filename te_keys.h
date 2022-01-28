@@ -63,7 +63,7 @@
 #define K_BLK_UNSET 1027
 #define K_MACRO     1028
 
-#define KEYS_MAX    29   /* Max. # of key bindings */
+#define KEYS_MAX    29		/* Max. # of key bindings */
 
 /* Control characters
    ------------------

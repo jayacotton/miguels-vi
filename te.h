@@ -110,8 +110,8 @@ extern void NewFile();
 extern int ReadFile();
 extern int WriteFile();
 extern int MacroRunFile();
-extern char * GetKeyWhat();
-extern void  MenuHelpCh();
+extern char *GetKeyWhat();
+extern void MenuHelpCh();
 extern int FreeArray();
 extern int InsertLine();
 extern void ErrLineTooMany();
@@ -119,7 +119,7 @@ extern void ErrLineMem();
 extern void ErrLineLong();
 extern void ErrLineOpen();
 extern void ErrLine();
-extern char * AllocMem();
+extern char *AllocMem();
 extern int CrtIn();
 extern int ForceGetCh();
 extern void LoopBlkUnset();
@@ -159,42 +159,43 @@ extern void LoopGo();
 extern void CrtSetupEx();
 extern int bdos();
 
+#define FILENAME_LEN 14
 
 #ifndef CRT_DEF_ROWS
-#define CRT_DEF_ROWS 24 /* Default screen rows */
+#define CRT_DEF_ROWS 24		/* Default screen rows */
 #endif
 
 #ifndef CRT_DEF_COLS
-#define CRT_DEF_COLS 80 /* Default screen columns */
+#define CRT_DEF_COLS 80		/* Default screen columns */
 #endif
 
 #ifndef OPT_Z80
 //#define OPT_Z80    1  /* Write some things as Z80 assembler */
-#define OPT_Z80    0  /* Write some things as Z80 assembler */
+#define OPT_Z80    0		/* Write some things as Z80 assembler */
 #endif
 
 #ifndef OPT_LWORD
-#define OPT_LWORD  1  /* Go to word on the left */
+#define OPT_LWORD  1		/* Go to word on the left */
 #endif
 
 #ifndef OPT_RWORD
-#define OPT_RWORD  1  /* Go to word on the right */
+#define OPT_RWORD  1		/* Go to word on the right */
 #endif
 
 #ifndef OPT_FIND
-#define OPT_FIND   1  /* Find string */
+#define OPT_FIND   1		/* Find string */
 #endif
 
 #ifndef OPT_GOTO
-#define OPT_GOTO   1  /* Go to line # */
+#define OPT_GOTO   1		/* Go to line # */
 #endif
 
 #ifndef OPT_BLOCK
-#define OPT_BLOCK  1  /* Block selection */
+#define OPT_BLOCK  1		/* Block selection */
 #endif
 
 #ifndef OPT_MACRO
-#define OPT_MACRO  1  /* Enable macros */
+#define OPT_MACRO  1		/* Enable macros */
 #endif
 
 /* CRT defs.
@@ -214,50 +215,49 @@ extern int bdos();
 #if CRT_CAN_REV
 #else
 #ifndef BLOCK_CHR
-#define BLOCK_CHR    '*'  /* Character to mark lines as selected, when CRT_CAN_REV == 0 */
+#define BLOCK_CHR    '*'	/* Character to mark lines as selected, when CRT_CAN_REV == 0 */
 #endif
 #endif
 
 /* More defs.
    ----------
 */
-#define FORCED_MAX 128   /* Keyboard forced entry buffer size (for paste, tabs, etc.) */
+#define FORCED_MAX 128		/* Keyboard forced entry buffer size (for paste, tabs, etc.) */
 
-#define FIND_MAX   32    /* Find string buffer size */
+#define FIND_MAX   32		/* Find string buffer size */
 
-#define PS_ROW     0     /* Information position */
-#define PS_FNAME   4     /* Filename - position in row */
-#define PS_TXT     "--- | Lin:0000/0000/0000 Col:00/00 Len:00"  /* Information layout */
-#define PS_INF     (cf_cols - 41)  /* Information layout - position in row */
-#define PS_CLP     (cf_cols - 41)  /* Clipboard status */
-#define PS_LIN_CUR (cf_cols - 31)  /* Current line # - position in row */
-#define PS_LIN_NOW (cf_cols - 26)  /* How many lines # - position in row */
-#define PS_LIN_MAX (cf_cols - 21)  /* Max. # of lines - position in row */
-#define PS_COL_CUR (cf_cols - 12)  /* Current column # - position in row */
-#define PS_COL_NOW (cf_cols -  2)  /* Line length - position in row */
-#define PS_COL_MAX (cf_cols -  9)  /* Max. line length - position in row */
+#define PS_ROW     0		/* Information position */
+#define PS_FNAME   4		/* Filename - position in row */
+#define PS_TXT     "--- | Lin:0000/0000/0000 Col:00/00 Len:00"	/* Information layout */
+#define PS_INF     (cf_cols - 41)	/* Information layout - position in row */
+#define PS_CLP     (cf_cols - 41)	/* Clipboard status */
+#define PS_LIN_CUR (cf_cols - 31)	/* Current line # - position in row */
+#define PS_LIN_NOW (cf_cols - 26)	/* How many lines # - position in row */
+#define PS_LIN_MAX (cf_cols - 21)	/* Max. # of lines - position in row */
+#define PS_COL_CUR (cf_cols - 12)	/* Current column # - position in row */
+#define PS_COL_NOW (cf_cols -  2)	/* Line length - position in row */
+#define PS_COL_MAX (cf_cols -  9)	/* Max. line length - position in row */
 
 #if CRT_LONG
-#define BOX_ROW    2        /* Editor box position */
+#define BOX_ROW    2		/* Editor box position */
 #else
 #define BOX_ROW    1
 #endif
 
 
-#define putchr     CrtOut   /* Print a character on screen */
+#define putchr     CrtOut	/* Print a character on screen */
 
 #if OPT_MACRO
 
 /* Macros
    ------
 */
-#define MAC_START   '{'  /* Left delimiter for symbol names in macros */
-#define MAC_END     '}'  /* Right delimiter for symbol names in macros */
-#define MAC_SEP     ':'  /* Separator between symbol names and # of repeats */
-#define MAC_ESCAPE  '\\' /* For escaped characters in macros */
-#define MAC_SYM_MAX 10   /* Max. length of macro symbol name in characters */
-#define MAC_SYM_SIZ 11   /* MAC_SYM_MAX + '\0' */
-#define MAC_FTYPE   ".m" /* Default filetype for macro files */
+#define MAC_START   '{'		/* Left delimiter for symbol names in macros */
+#define MAC_END     '}'		/* Right delimiter for symbol names in macros */
+#define MAC_SEP     ':'		/* Separator between symbol names and # of repeats */
+#define MAC_ESCAPE  '\\'	/* For escaped characters in macros */
+#define MAC_SYM_MAX 10		/* Max. length of macro symbol name in characters */
+#define MAC_SYM_SIZ 11		/* MAC_SYM_MAX + '\0' */
+#define MAC_FTYPE   ".m"	/* Default filetype for macro files */
 
 #endif
-

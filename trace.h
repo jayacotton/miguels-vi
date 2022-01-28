@@ -29,7 +29,7 @@ int snapmem(int *, int *, int, int, char *);
 #define SNAP(addr,size,flag) { char snapbuff[50]; \
 	sprintf(snapbuff,"file %s: line %d",__FILE__,__LINE__); \
 	snapmem(addr,addr,size,flag,snapbuff); \
-	}; 
+	};
 #define TRACE(msg) printf("%s %d %s\n",__FILE__,__LINE__,msg);
 #define TRACEFL(msg) {if(tfl)printf("%s %d %s\n",__FILE__,__LINE__,msg);}
 #define TVAL(fmt,var) printf(fmt,var);
