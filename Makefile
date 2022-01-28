@@ -11,7 +11,10 @@ te_ansi: te_ansi.o
 	$(CC) $(LINKOP) -ote te_ansi.o
 
 clean:
-	rm *.o *.lis *.sym TE.COM te  *.map
+	rm -f *.o *.lis *.sym TE.COM te  *.map *.c~ *.h~
+
+lessclean:
+	rm -f *.o *.lis *.sym te  *.map *.c~ *.h~
 
 install:
 	sudo cp TE.COM /var/www/html/TETEST.COM
