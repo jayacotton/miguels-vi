@@ -1,6 +1,9 @@
 te
 ==
 
+NOTE:  This is a subset of Miguel Garcia's TE editor, this build is for
+I8080 with ANSI terminal.  For complete support goto www.floppysoftware.es
+
 v1.73 / 20 Nov 2021 for CP/M
 
 (c) 2015-2021 Miguel Garcia / FloppySoftware
