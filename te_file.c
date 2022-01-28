@@ -35,16 +35,16 @@
 */
 void ResetLines()
 {
-	int i;
-TRACE("ResetLines");
-	FreeArray(lp_arr, cf_mx_lines, 0);
+    int i;
+    TRACE("ResetLines");
+    FreeArray(lp_arr, cf_mx_lines, 0);
 
-	lp_cur = lp_now = lp_chg = box_shr = box_shc = 0;
+    lp_cur = lp_now = lp_chg = box_shr = box_shc = 0;
 
 #if OPT_BLOCK
 
-	blk_start = blk_end = -1;
-	blk_count = 0;
+    blk_start = blk_end = -1;
+    blk_count = 0;
 
 #endif
 
@@ -55,14 +55,14 @@ TRACE("ResetLines");
 */
 void NewFile()
 {
-TRACE("NewFile");	/* Free current contents */
-	ResetLines();
+    TRACE("NewFile");		/* Free current contents */
+    ResetLines();
 
-	/* No filename */
-	file_name[0] = '\0';
+    /* No filename */
+    file_name[0] = '\0';
 
-	/* Build first line */
-	InsertLine(0, NULL);
+    /* Build first line */
+    InsertLine(0, NULL);
 }
 
 /* Read text file
@@ -72,99 +72,92 @@ TRACE("NewFile");	/* Free current contents */
 ReadFile(fn)
 char *fn;
 {
-	FILE *fp;
-	int ch, code, len, i, tabs, rare;
-	unsigned char *p;
-TRACE("ReadFile");
-	/* Free current contents */
-	ResetLines();
+    FILE *fp;
+    int ch, code, len, i, tabs, rare;
+    unsigned char *p;
+    TRACE("ReadFile");
+    /* Free current contents */
+    ResetLines();
 
-	/* Setup some things */
-	code = tabs = rare = 0;
+    /* Setup some things */
+    code = tabs = rare = 0;
 
-	/* Open the file */
-	SysLine("Reading file... ");
+    /* Open the file */
+    SysLine("Reading file... ");
 
-	if(!(fp = fopen(fn, "r")))
-	{
-		ErrLineOpen(); return -1;
+    if (!(fp = fopen(fn, "r"))) {
+	ErrLineOpen();
+	return -1;
+    }
+
+    /* Read the file */
+    for (i = 0; i < 32000; ++i) {
+	if (!fgets(ln_dat, ln_max + 2, fp))	/* ln_max + CR + ZERO */
+	    break;
+
+	if (lp_now == cf_mx_lines) {
+	    ErrLineTooMany();
+	    ++code;
+	    break;
 	}
 
-	/* Read the file */
-	for(i = 0; i < 32000; ++i)
-	{
-		if(!fgets(ln_dat, ln_max + 2, fp)) /* ln_max + CR + ZERO */
-			break;
+	len = strlen(ln_dat);
 
-		if(lp_now == cf_mx_lines)
-		{
-			ErrLineTooMany(); ++code; break;
-		}
-
-		len = strlen(ln_dat);
-
-		if(ln_dat[len - 1] == '\n')
-			ln_dat[--len] = 0;
-		else if(len > ln_max)
-		{
-			ErrLineLong(); ++code; break;
-		}
-
-		if(!(lp_arr[lp_now] = AllocMem(len + 1)))
-		{
-			++code; break;
-		}
-
-		p = (unsigned char *)strcpy(lp_arr[lp_now++], ln_dat);
-
-		/* Change TABs to SPACEs, and check characters */
-		//while((ch = (*p & 0xFF)))
-		while((ch = *p))
-		{
-			if(ch < ' ')
-			{
-				if(ch == '\t')
-				{
-					*p = ' '; ++tabs;
-				}
-				else if (ch == '\r')
-				{}	 // maybe filter return 
-				else if (ch == '\n')
-				{}	 // maybe filter newline 
-				else
-				{
-					*p = '?'; ++rare;
-				}
-			}
-
-			++p;
-		}
+	if (ln_dat[len - 1] == '\n')
+	    ln_dat[--len] = 0;
+	else if (len > ln_max) {
+	    ErrLineLong();
+	    ++code;
+	    break;
 	}
 
-	/* Close the file */
-	fclose(fp);
-
-	/* Check errors */
-	if(code)
-		return -1;
-
-	/* Check if empty file */
-	if(!lp_now)
-	{
-		/* Build first line */
-		InsertLine(0, NULL);
+	if (!(lp_arr[lp_now] = AllocMem(len + 1))) {
+	    ++code;
+	    break;
 	}
 
-	/* Check TABs */
-	if(tabs)
-		ErrLine("Tabs changed to spaces");
+	p = (unsigned char *) strcpy(lp_arr[lp_now++], ln_dat);
 
-	/* Check rare chars. */
-	if(rare)
-		ErrLine("Illegal characters changed to '?'");
+	/* Change TABs to SPACEs, and check characters */
+	//while((ch = (*p & 0xFF)))
+	while ((ch = *p)) {
+	    if (ch < ' ') {
+		if (ch == '\t') {
+		    *p = ' ';
+		    ++tabs;
+		} else {
+		    *p = '?';
+		    ++rare;
+		}
+	    }
 
-	/* Success */
-	return 0;
+	    ++p;
+	}
+    }
+
+    /* Close the file */
+    fclose(fp);
+
+    /* Check errors */
+    if (code)
+	return -1;
+
+    /* Check if empty file */
+    if (!lp_now) {
+	/* Build first line */
+	InsertLine(0, NULL);
+    }
+
+    /* Check TABs */
+    if (tabs)
+	ErrLine("Tabs changed to spaces");
+
+    /* Check rare chars. */
+    if (rare)
+	ErrLine("Illegal characters changed to '?'");
+
+    /* Success */
+    return 0;
 }
 
 /* Backup the previous file with the same name
@@ -174,23 +167,21 @@ TRACE("ReadFile");
 void BackupFile(fn)
 char *fn;
 {
-	FILE *fp;
-	char *bkp;
-TRACE("BackupFile");
-	/* Check if file exists */
-	//if((fp = fopen(fn, "r")) != NULL)
-	if((fp = fopen(fn, "r")))
-	{
-		fclose(fp);
+    FILE *fp;
+    char *bkp;
+    TRACE("BackupFile");
+    /* Check if file exists */
+    if ((fp = fopen(fn, "r"))) {
+	fclose(fp);
 
-		bkp = "te.bkp";
+	bkp = "te.bkp";
 
-		/* Remove the previous backup file, if exists */
-		remove(bkp);
+	/* Remove the previous backup file, if exists */
+	remove(bkp);
 
-		/* Rename the old file as backup */
-		rename(fn, bkp);
-	}
+	/* Rename the old file as backup */
+	rename(fn, bkp);
+    }
 }
 
 /* Write text file
@@ -200,46 +191,43 @@ TRACE("BackupFile");
 WriteFile(fn)
 char *fn;
 {
-	FILE *fp;
-	int i;
-TRACE("WriteFile");
-	SysLine("Writing file... ");
+    FILE *fp;
+    int i;
+    TRACE("WriteFile");
+    SysLine("Writing file... ");
 
-	/* Backup old file */
-	BackupFile(fn);
+    /* Backup old file */
+    BackupFile(fn);
 
-	/* Open the file */
+    /* Open the file */
 
-	if(!(fp = fopen(fn, "w")))
-	{
-		ErrLineOpen(); return -1;
+    if (!(fp = fopen(fn, "w"))) {
+	ErrLineOpen();
+	return -1;
+    }
+
+    /* Write the file */
+    for (i = 0; i < lp_now; ++i) {
+	if (fputs(lp_arr[i], fp) == EOF || fputc('\n', fp) == EOF) {
+
+	    fclose(fp);
+	    remove(fn);
+
+	    ErrLine("Can't write");
+
+	    return -1;
 	}
+    }
 
-	/* Write the file */
-	for(i = 0; i < lp_now; ++i)
-	{
-		if(fputs(lp_arr[i], fp) == EOF || fputc('\n', fp) == EOF) {
+    /* Close the file */
+    if (fclose(fp) == EOF) {
+	remove(fn);
 
-			fclose(fp); remove(fn);
+	ErrLine("Can't close");
 
-			ErrLine("Can't write");
+	return -1;
+    }
 
-			return -1;
-		}
-	}
-
-	/* Close the file */
-	if(fclose(fp) == EOF)
-	{
-		remove(fn);
-
-		ErrLine("Can't close");
-
-		return -1;
-	}
-
-	/* Success */
-	return (lp_chg = 0);
+    /* Success */
+    return (lp_chg = 0);
 }
-
-

@@ -45,43 +45,31 @@ MacroRunFile(fname, raw)
 char *fname;
 int raw;
 {
-TRACE("MacroRunFIle");
-	if(!(mac_fp = fopen(fname, "r")))
-	{
-		ErrLineOpen();
-		
-		return -1;
-	}
-	
-	mac_raw = raw;
-	
-	/* Reset auto-indentation and auto-list */
-	mac_indent = cf_indent;
-	mac_list = cf_list;
-	
-	cf_indent = cf_list = 0;
-	
-	return 0;
-}
+    TRACE("MacroRunFIle");
+    if (!(mac_fp = fopen(fname, "r"))) {
+	ErrLineOpen();
 
-/* Run a macro from string
-   -----------------------
-*/
-/*
-MacroRunStr(s)
-char *s;
-{
-	mac_str = s;
+	return -1;
+    }
+
+    mac_raw = raw;
+
+    /* Reset auto-indentation and auto-list */
+    mac_indent = cf_indent;
+    mac_list = cf_list;
+
+    cf_indent = cf_list = 0;
+
+    return 0;
 }
-*/
 
 /* Tell if a macro is running
    --------------------------
 */
 MacroRunning()
 {
-TRACE("MacroRunning");
-	return mac_fp != NULL /* || mac_str != NULL */;
+    TRACE("MacroRunning");
+    return mac_fp != NULL /* || mac_str != NULL */ ;
 }
 
 /* Stop a macro
@@ -89,20 +77,19 @@ TRACE("MacroRunning");
 */
 void MacroStop()
 {
-TRACE("MacroStop");
-	if(mac_fp)
-	{
-		fclose(mac_fp);
-	}
+    TRACE("MacroStop");
+    if (mac_fp) {
+	fclose(mac_fp);
+    }
 
-	mac_fp = /*mac_str =*/ NULL;
-	
-	/* Restore auto-indentation and auto-list */
-	cf_indent = mac_indent;
-	cf_list = mac_list;
+    mac_fp = /*mac_str = */ NULL;
 
-	/* Flag end of input */
-	ForceCh('\0');
+    /* Restore auto-indentation and auto-list */
+    cf_indent = mac_indent;
+    cf_list = mac_list;
+
+    /* Flag end of input */
+    ForceCh('\0');
 }
 
 /* Read raw character from macro input
@@ -110,54 +97,38 @@ TRACE("MacroStop");
 */
 MacroGetRaw()
 {
-TRACE("MacroGetRaw");
-	int ch;
+    TRACE("MacroGetRaw");
+    int ch;
 
-	if(mac_fp)
-	{
-		if(mac_raw)
-		{
-			/* Raw mode - translate some control chars. */
-			switch(ch = fgetc(mac_fp))
-			{
-				case '\n' : ch = K_CR; break;
-				case '\t' : ch = ' '; break;
-			}
-		}
-		else
-		{
-			/* Normal mode: ignore new-lines */
-			while((ch = fgetc(mac_fp)) == '\n')
-				;
-		}
-
-		if(ch != EOF)
-		{
-			/* Translate control chars. */
-			if(ch < 32 || ch == 127)
-			{
-				ch = '?';
-			}
-			
-			return ch;
-		}
-
-		MacroStop();
+    if (mac_fp) {
+	if (mac_raw) {
+	    /* Raw mode - translate some control chars. */
+	    switch (ch = fgetc(mac_fp)) {
+	    case '\n':
+		ch = K_CR;
+		break;
+	    case '\t':
+		ch = ' ';
+		break;
+	    }
+	} else {
+	    /* Normal mode: ignore new-lines */
+	    while ((ch = fgetc(mac_fp)) == '\n');
 	}
-	/*
-	else if(mac_str)
-	{
-		if(*mac_str)
-		{
-			return *mac_str++;
-		}
 
-		MacroStop();
+	if (ch != EOF) {
+	    /* Translate control chars. */
+	    if (ch < 32 || ch == 127) {
+		ch = '?';
+	    }
+
+	    return ch;
 	}
-	*/
 
-	/* No character available */
-	return '\0';
+	MacroStop();
+    }
+    /* No character available */
+    return '\0';
 }
 
 /* Check if a character is legal for symbol name
@@ -166,8 +137,8 @@ TRACE("MacroGetRaw");
 MacroIsCmdChar(ch)
 char ch;
 {
-TRACE("MacroIsCmdChar");
-	return isalpha(ch) || ch == '#' || ch == '+' || ch == '-';
+    TRACE("MacroIsCmdChar");
+    return isalpha(ch) || ch == '#' || ch == '+' || ch == '-';
 }
 
 /* Check if a string is a symbol
@@ -176,8 +147,8 @@ TRACE("MacroIsCmdChar");
 MatchSym(s)
 char *s;
 {
-TRACE("MatchSym");
-	return MatchStr(mac_sym, s);
+    TRACE("MatchSym");
+    return MatchStr(mac_sym, s);
 }
 
 /* Process a macro input unit
@@ -185,165 +156,157 @@ TRACE("MatchSym");
 */
 void MacroGet()
 {
-TRACE("MacroGet");
-	int i, n, ch;
+    TRACE("MacroGet");
+    int i, n, ch;
 
-	/* Continue if there is a character available */
-	if((ch = MacroGetRaw()))
-	{
-		/* Return character if raw mode */
-		if(mac_raw)
-		{
-			ForceCh(ch);
-			
-			return;
+    /* Continue if there is a character available */
+    if ((ch = MacroGetRaw())) {
+	/* Return character if raw mode */
+	if (mac_raw) {
+	    ForceCh(ch);
+
+	    return;
+	}
+
+	/* Return character if it's not the start of a symbol */
+	if (ch != MAC_START) {
+	    /* Check for escaped characters */
+	    if (ch != MAC_ESCAPE) {
+		ForceCh(ch);
+	    } else {
+		if ((ch = MacroGetRaw())) {
+		    ForceCh(ch);
+		} else {
+		    /* Error: missing escaped character */
+		    ErrLine("Bad escape sequence");
+
+		    MacroStop();
 		}
-		
-		/* Return character if it's not the start of a symbol */
-		if(ch != MAC_START)
-		{
-			/* Check for escaped characters */
-			if(ch != MAC_ESCAPE)
-			{
-				ForceCh(ch);
-			}
-			else
-			{
-				if((ch = MacroGetRaw()))
-				{
-					ForceCh(ch);
-				}
-				else
-				{
-					/* Error: missing escaped character */
-					ErrLine("Bad escape sequence");
+	    }
 
-					MacroStop();
-				}
-			}
+	    return;
+	}
 
-			return;
+	/* Get symbol name like {up} or {up:12} --> "up" */
+	for (i = 0; MacroIsCmdChar(ch = MacroGetRaw()) && i < MAC_SYM_MAX;
+	     ++i) {
+	    mac_sym[i] = tolower(ch);
+	}
+
+	if (i) {
+	    /* End of symbol name */
+	    mac_sym[i] = '\0';
+
+	    /* Get # of repeats if any - ie: {up:12} --> 12 */
+	    if (ch == MAC_SEP) {
+		n = 0;
+
+		while (isdigit(ch = MacroGetRaw()))
+		    n = n * 10 + ch - '0';
+
+		if (n < 0 || n > FORCED_MAX) {
+		    n = -1;
+		}
+	    } else {
+		n = 1;
+	    }
+
+	    if (n >= 0) {
+		/* Check for comments */
+		if (ch == ' ') {
+		    if ((MatchSym("#"))) {
+			while ((ch = MacroGetRaw())) {
+			    if (ch == MAC_END) {
+				ForceCh('\0');
+
+				return;
+			    }
+			}
+		    }
 		}
 
-		/* Get symbol name like {up} or {up:12} --> "up" */
-		for(i = 0; MacroIsCmdChar(ch = MacroGetRaw()) && i < MAC_SYM_MAX; ++i)
-		{
-			mac_sym[i] = tolower(ch);
-		}
+		/* Check for commands */
+		if (ch == MAC_END) {
+		    /* Do command action */
+		    ch = 0;
 
-		if(i)
-		{
-			/* End of symbol name */
-			mac_sym[i] = '\0';
-
-			/* Get # of repeats if any - ie: {up:12} --> 12 */
-			if(ch == MAC_SEP)
-			{
-				n = 0;
-
-				while(isdigit(ch = MacroGetRaw()))
-					n = n * 10 + ch - '0';
-
-				if(n < 0 || n > FORCED_MAX)
-				{
-					n = -1;
-				}
-			}
-			else
-			{
-				n = 1;
-			}
-
-			if(n >= 0)
-			{
-				/* Check for comments */
-				if(ch == ' ')
-				{
-					if((MatchSym("#")))
-					{
-						while((ch = MacroGetRaw()))
-						{
-							if(ch == MAC_END)
-							{
-								ForceCh('\0');
-
-								return;
-							}
-						}
-					}
-				}
-
-				/* Check for commands */
-				if(ch == MAC_END)
-				{
-					/* Do command action */
-					ch = 0;
-
-					if     (MatchSym("up"))         ch = K_UP;
-					else if(MatchSym("down"))       ch = K_DOWN;
-					else if(MatchSym("left"))       ch = K_LEFT;
-					else if(MatchSym("right"))      ch = K_RIGHT;
-					else if(MatchSym("begin"))      ch = K_BEGIN;
-					else if(MatchSym("end"))        ch = K_END;
-					else if(MatchSym("top"))        ch = K_TOP;
-					else if(MatchSym("bottom"))     ch = K_BOTTOM;
-					else if(MatchSym("newline"))    ch = K_CR;
-					else if(MatchSym("indent"))     ch = K_TAB;
-					else if(MatchSym("delright"))   ch = K_RDEL;
-					else if(MatchSym("delleft"))    ch = K_LDEL;
-					else if(MatchSym("cut"))        ch = K_CUT;
-					else if(MatchSym("copy"))       ch = K_COPY;
-					else if(MatchSym("paste"))      ch = K_PASTE;
-					else if(MatchSym("delete"))     ch = K_DELETE;
-					else if(MatchSym("clearclip"))  ch = K_CLRCLP;
+		    if (MatchSym("up"))
+			ch = K_UP;
+		    else if (MatchSym("down"))
+			ch = K_DOWN;
+		    else if (MatchSym("left"))
+			ch = K_LEFT;
+		    else if (MatchSym("right"))
+			ch = K_RIGHT;
+		    else if (MatchSym("begin"))
+			ch = K_BEGIN;
+		    else if (MatchSym("end"))
+			ch = K_END;
+		    else if (MatchSym("top"))
+			ch = K_TOP;
+		    else if (MatchSym("bottom"))
+			ch = K_BOTTOM;
+		    else if (MatchSym("newline"))
+			ch = K_CR;
+		    else if (MatchSym("indent"))
+			ch = K_TAB;
+		    else if (MatchSym("delright"))
+			ch = K_RDEL;
+		    else if (MatchSym("delleft"))
+			ch = K_LDEL;
+		    else if (MatchSym("cut"))
+			ch = K_CUT;
+		    else if (MatchSym("copy"))
+			ch = K_COPY;
+		    else if (MatchSym("paste"))
+			ch = K_PASTE;
+		    else if (MatchSym("delete"))
+			ch = K_DELETE;
+		    else if (MatchSym("clearclip"))
+			ch = K_CLRCLP;
 
 #if OPT_BLOCK
-					else if(MatchSym("blockstart")) ch = K_BLK_START;
-					else if(MatchSym("blockend"))   ch = K_BLK_END;
+		    else if (MatchSym("blockstart"))
+			ch = K_BLK_START;
+		    else if (MatchSym("blockend"))
+			ch = K_BLK_END;
 #endif
 
-					if(ch)
-					{
-						while(n--)
-						{
-							if(ForceCh(ch))
-								break;
-						}
-
-						return;
-					}
-
-					/* Special commands */
-					if(MatchSym("filename"))
-					{
-						while(n--)
-							ForceStr(CurrentFile());
-
-						return;
-					}
-					else if(MatchSym("autoindent")) {
-						cf_indent = (n ? 1 : 0);
-						
-						ForceCh('\0');
-						
-						return;
-					}
-					else if(MatchSym("autolist")) {
-						cf_list = (n ? 1 : 0);
-						
-						ForceCh('\0');
-						
-						return;
-					}
-				}
+		    if (ch) {
+			while (n--) {
+			    if (ForceCh(ch))
+				break;
 			}
+
+			return;
+		    }
+
+		    /* Special commands */
+		    if (MatchSym("filename")) {
+			while (n--)
+			    ForceStr(CurrentFile());
+
+			return;
+		    } else if (MatchSym("autoindent")) {
+			cf_indent = (n ? 1 : 0);
+
+			ForceCh('\0');
+
+			return;
+		    } else if (MatchSym("autolist")) {
+			cf_list = (n ? 1 : 0);
+
+			ForceCh('\0');
+
+			return;
+		    }
 		}
-
-		/* Error: symbol name not found, bad formed, too large, bad # of repeats */
-		ErrLine("Bad symbol");
-
-		MacroStop();
+	    }
 	}
-}
 
-
+	/* Error: symbol name not found, bad formed, too large, bad # of repeats */
+	ErrLine("Bad symbol");
+
+	MacroStop();
+    }
+}

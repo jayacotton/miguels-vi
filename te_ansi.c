@@ -46,8 +46,6 @@
 	It needs to translate some keyboard codes.
 */
 
-//int _bdos = 5;
-
 /*Default configuration values
    ----------------------------
 */
@@ -58,12 +56,12 @@
    -------
    Set to 1 to add the following functionalities, else 0.
 */
-#define OPT_LWORD 0  /* Go to word on the left */
-#define OPT_RWORD 0  /* Go to word on the right */
-#define OPT_FIND  1  /* Find string */
-#define OPT_GOTO  1  /* Go to line # */
-#define OPT_BLOCK 1  /* Block selection */
-#define OPT_MACRO 1  /* Enable macros */
+#define OPT_LWORD 0		/* Go to word on the left */
+#define OPT_RWORD 0		/* Go to word on the right */
+#define OPT_FIND  1		/* Find string */
+#define OPT_GOTO  1		/* Go to line # */
+#define OPT_BLOCK 1		/* Block selection */
+#define OPT_MACRO 1		/* Enable macros */
 
 
 /* Include main code
@@ -77,6 +75,7 @@
 */
 void CrtSetup()
 {
+// *INDENT-OFF*
 #asm
 	ld  hl,(1)
 	inc hl
@@ -92,12 +91,15 @@ clop:	ld	a,(hl)
 	jnz	clop
 	ret
 #endasm
+// *INDENT-ON*
 }
+// *INDENT-OFF*
 #asm
 BiosConst:  jp 0
 BiosConin:  jp 0
 BiosConout: jp 0
 #endasm
+// *INDENT-ON*
 
 /* Reset CRT: Used when the editor exits
    -------------------------------------
@@ -115,7 +117,9 @@ void CrtReset()
 
    void CrtOut(int ch)
 */
-void CrtOut(int ch){
+void CrtOut(int ch)
+{
+// *INDENT-OFF*
 #asm
 	ld   c,l
 	ld   a,l
@@ -125,81 +129,71 @@ void CrtOut(int ch){
 	ld   c,13
 	jp   BiosConout
 #endasm
+// *INDENT-ON*
 }
-//void CrtOut(int ch)
-//{
-//	putchar(ch);
-//}
-/* Input character from the keyboard
-   ---------------------------------
-   All program input is done with this function.
 
-   Translates the ANSI key codes into single characters.
-
-   int CrtIn(void)
-*/
 extern int CrtInSt();
 extern int CrtInEx();
 
 int CrtIn()
 {
-	int ch;
-TRACE("CrtIn");
-	ch = CrtInEx();
-	/* Translate key codes begining with 0x1B (ESC) */
+    int ch;
+    TRACE("CrtIn");
+    ch = CrtInEx();
+    /* Translate key codes begining with 0x1B (ESC) */
 
-	if(ch == ESC)
-	{
-		if(CrtInSt())
-		{
-			ch = 0;
+    if (ch == ESC) {
+	if (CrtInSt()) {
+	    ch = 0;
 
-			if(CrtInEx() == '[')
-			{
-				if(CrtInSt())
-				{
-					switch(CrtInEx())
-					{
-						case 'A' : /* UP */
-							return CTL_E;
-						case 'B' : /* DOWN */
-							return CTL_X;
-						case 'C' : /* RIGHT */
-							return CTL_D;
-						case 'D' : /* LEFT */
-							return CTL_S;
-						case 'H' : /* HOME */
-							return CTL_V;
-						case 'F' : /* END */
-							return CTL_A;
-					}
-				}
-
-			}
+	    if (CrtInEx() == '[') {
+		if (CrtInSt()) {
+		    switch (CrtInEx()) {
+		    case 'A':	/* UP */
+			return CTL_E;
+		    case 'B':	/* DOWN */
+			return CTL_X;
+		    case 'C':	/* RIGHT */
+			return CTL_D;
+		    case 'D':	/* LEFT */
+			return CTL_S;
+		    case 'H':	/* HOME */
+			return CTL_V;
+		    case 'F':	/* END */
+			return CTL_A;
+		    }
 		}
+
+	    }
 	}
-	return ch;
+    }
+    return ch;
 }
 
 int CrtInSt()
 {
-TRACE("CrtInSt");
+    TRACE("CrtInSt");
+// *INDENT-OFF*
 #asm
 	call BiosConst
 	ld h,0
 	ld l,a
 	ret
 #endasm
-}	
+// *INDENT-ON*
+}
+
 int CrtInEx()
 {
-TRACE("CrtInEx");
+    TRACE("CrtInEx");
+// *INDENT-OFF*
 #asm
 	call BiosConin
 	ld h,0
 	ld l,a
 	ret
 #endasm
+// *INDENT-ON*
 }
 
 /* Clear screen and send cursor to 0,0
@@ -208,9 +202,11 @@ TRACE("CrtInEx");
 */
 void CrtClear()
 {
-TRACE("CrtClear");
-	CrtOut(ESC); putstr("[1;1H"); /* Cursor to 0,0 */
-	CrtOut(ESC); putstr("[2J");   /* Clear CRT */
+    TRACE("CrtClear");
+    CrtOut(ESC);
+    putstr("[1;1H");		/* Cursor to 0,0 */
+    CrtOut(ESC);
+    putstr("[2J");		/* Clear CRT */
 }
 
 /* Locate the cursor (HOME is 0,0)
@@ -220,10 +216,13 @@ TRACE("CrtClear");
 void CrtLocate(row, col)
 int row, col;
 {
-TRACE("CrtLocate");
-	CrtOut(ESC); CrtOut('[');
-	putint("%d", row + 1); CrtOut(';');
-	putint("%d", col + 1); CrtOut('H');
+    TRACE("CrtLocate");
+    CrtOut(ESC);
+    CrtOut('[');
+    putint("%d", row + 1);
+    CrtOut(';');
+    putint("%d", col + 1);
+    CrtOut('H');
 }
 
 /* Erase line and cursor to row,0
@@ -233,17 +232,19 @@ TRACE("CrtLocate");
 void CrtClearLine(row)
 int row;
 {
-TRACE("CrtClearLine");
-	CrtLocate(row, 0); CrtClearEol();
+    TRACE("CrtClearLine");
+    CrtLocate(row, 0);
+    CrtClearEol();
 }
 
 /* Erase from the cursor to the end of the line
    --------------------------------------------
 */
-void CrtClearEol()
+void CrtClearEol ()
 {
-TRACE("CrtClearEol");
-	CrtOut(ESC); putstr("[K");
+  TRACE ("CrtClearEol");
+  CrtOut (ESC);
+  putstr ("[K");
 }
 
 /* Turn on / off reverse video
@@ -252,7 +253,9 @@ TRACE("CrtClearEol");
 void CrtReverse(on)
 int on;
 {
-TRACE("CrtReverse");
-	CrtOut(ESC); CrtOut('['); CrtOut(on ? '7' : '0'); CrtOut('m');
+    TRACE("CrtReverse");
+    CrtOut(ESC);
+    CrtOut('[');
+    CrtOut(on ? '7' : '0');
+    CrtOut('m');
 }
-

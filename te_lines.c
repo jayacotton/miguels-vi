@@ -33,8 +33,8 @@
 */
 GetFirstLine()
 {
-TRACE("GetFirstLine");
-	return lp_cur - box_shr;
+    TRACE("GetFirstLine");
+    return lp_cur - box_shr;
 }
 
 /* Return line # of last line printed on the editor box
@@ -42,12 +42,12 @@ TRACE("GetFirstLine");
 */
 GetLastLine()
 {
-	int last;
+    int last;
 
-TRACE("GetLastLine");
-	last = GetFirstLine() + box_rows - 1;
+    TRACE("GetLastLine");
+    last = GetFirstLine() + box_rows - 1;
 
-	return last >= lp_now - 1 ? lp_now - 1 : last; /* min(lp_now - 1, last) */
+    return last >= lp_now - 1 ? lp_now - 1 : last;	/* min(lp_now - 1, last) */
 }
 
 /* Set text in line #
@@ -55,42 +55,43 @@ TRACE("GetLastLine");
    Set 'text' to NULL for empty lines. Return NZ on success, else Z.
 */
 SetLine(line, text, insert)
-int line; char *text; int insert;
+int line;
+char *text;
+int insert;
 {
-	char *p;
-	int i;
-	
-TRACE("SetLine");
-	if(insert && lp_now >= cf_mx_lines) {
-		ErrLineTooMany();
-		
-		return 0;
-	}
+    char *p;
+    int i;
 
-	if(!text) {
-		text = "";
-	}
-
-	if((p = AllocMem(strlen(text) + 1))) {
-		if(insert) {
-			for(i = lp_now; i > line; --i) {
-				lp_arr[i] = lp_arr[i - 1];
-			}
-
-			++lp_now;
-		}
-		else {
-			if(lp_arr[line]) {
-				free(lp_arr[line]);
-			}
-		}
-
-		lp_arr[line] = strcpy(p, text);
-
-		return 1;
-	}
+    TRACE("SetLine");
+    if (insert && lp_now >= cf_mx_lines) {
+	ErrLineTooMany();
 
 	return 0;
+    }
+
+    if (!text) {
+	text = "";
+    }
+
+    if ((p = AllocMem(strlen(text) + 1))) {
+	if (insert) {
+	    for (i = lp_now; i > line; --i) {
+		lp_arr[i] = lp_arr[i - 1];
+	    }
+
+	    ++lp_now;
+	} else {
+	    if (lp_arr[line]) {
+		free(lp_arr[line]);
+	    }
+	}
+
+	lp_arr[line] = strcpy(p, text);
+
+	return 1;
+    }
+
+    return 0;
 }
 
 /* Modify text in line #
@@ -99,10 +100,11 @@ TRACE("SetLine");
 */
 
 ModifyLine(line, text)
-int line; char *text;
+int line;
+char *text;
 {
-TRACE("ModifyLine");
-	return SetLine(line, text, 0);
+    TRACE("ModifyLine");
+    return SetLine(line, text, 0);
 }
 
 /* Clear text in line #
@@ -113,8 +115,8 @@ TRACE("ModifyLine");
 ClearLine(line)
 int line;
 {
-TRACE("ClearLine");
-	return ModifyLine(line, NULL);
+    TRACE("ClearLine");
+    return ModifyLine(line, NULL);
 }
 
 /* Insert new line before line #
@@ -122,10 +124,11 @@ TRACE("ClearLine");
    Set 'text' to NULL for empty lines. Return NZ on success, else Z.
 */
 InsertLine(line, text)
-int line; char *text;
+int line;
+char *text;
 {
-TRACE("InsertLine");
-	return SetLine(line, text, 1);
+    TRACE("InsertLine");
+    return SetLine(line, text, 1);
 }
 
 /* Append new line after line #
@@ -133,10 +136,11 @@ TRACE("InsertLine");
    Set 'text' to NULL for empty lines. Return NZ on success, else Z.
 */
 AppendLine(line, text)
-int line; char *text;
+int line;
+char *text;
 {
-TRACE("AppendLine");
-	return InsertLine(line + 1, text);
+    TRACE("AppendLine");
+    return InsertLine(line + 1, text);
 }
 
 /* Split line # into two lines
@@ -146,30 +150,30 @@ TRACE("AppendLine");
 SplitLine(line, pos)
 int line, pos;
 {
-	char *p, *p2;
+    char *p, *p2;
 
-TRACE("SplitLine");
-	if((p = AllocMem(pos + 1))) {
-		if(AppendLine(line, lp_arr[line] + pos)) {
+    TRACE("SplitLine");
+    if ((p = AllocMem(pos + 1))) {
+	if (AppendLine(line, lp_arr[line] + pos)) {
 
-			/* We don't have strncpy() nor arrays of pointers yet, then... */
-			p2 = (char *)lp_arr[line];
+	    /* We don't have strncpy() nor arrays of pointers yet, then... */
+	    p2 = (char *) lp_arr[line];
 
-			p2[pos] = '\0';
+	    p2[pos] = '\0';
 
-			strcpy(p, p2);
+	    strcpy(p, p2);
 
-			free(p2);
+	    free(p2);
 
-			lp_arr[line] = (WORD)p;
+	    lp_arr[line] = (WORD) p;
 
-			return 1;
-		}
-
-		free(p);
+	    return 1;
 	}
 
-	return 0;
+	free(p);
+    }
+
+    return 0;
 }
 
 /* Delete line #
@@ -179,20 +183,20 @@ TRACE("SplitLine");
 DeleteLine(line)
 int line;
 {
-	int i;
+    int i;
 
-TRACE("DeleteLine");
-	free(lp_arr[line]);
+    TRACE("DeleteLine");
+    free(lp_arr[line]);
 
-	--lp_now;
+    --lp_now;
 
-	for(i = line; i < lp_now; ++i) {
-		lp_arr[i] = lp_arr[i + 1];
-	}
+    for (i = line; i < lp_now; ++i) {
+	lp_arr[i] = lp_arr[i + 1];
+    }
 
-	lp_arr[lp_now] = NULL;
+    lp_arr[lp_now] = NULL;
 
-	return 1;
+    return 1;
 }
 
 /* Join two consecutive lines
@@ -202,40 +206,26 @@ TRACE("DeleteLine");
 JoinLines(line)
 int line;
 {
-	char *p, *p1, *p2;
-	int s1, s2;
+    char *p, *p1, *p2;
+    int s1, s2;
 
-TRACE("JoinLines");
-	p1 = (char *)lp_arr[line];
-	p2 = (char *)lp_arr[line + 1];
+    TRACE("JoinLines");
+    p1 = (char *) lp_arr[line];
+    p2 = (char *) lp_arr[line + 1];
 
-	s1 = strlen(p1);
-	s2 = strlen(p2);
+    s1 = strlen(p1);
+    s2 = strlen(p2);
 
-	if(s1 + s2 <= ln_max) {
-		if((p = AllocMem(s1 + s2 + 1))) {
+    if (s1 + s2 <= ln_max) {
+	if ((p = AllocMem(s1 + s2 + 1))) {
+	    lp_arr[line] = strcat(strcpy(p, p1), p2);
+	    free(p1);
 
-			/*
-			strcpy(p, p1); strcat(p, p2);
+	    DeleteLine(line + 1);
 
-			lp_arr[line] = p;
-			*/
-
-			//
-			lp_arr[line] = strcat(strcpy(p, p1), p2);
-			//
-
-			//lp_arr[line] = strcpy(strcpy(p, p1) + s1, p2);  FIXME - What's wrong with this?
-
-			free(p1);
-
-			DeleteLine(line + 1);
-
-			return 1;
-		}
+	    return 1;
 	}
+    }
 
-	return 0;
+    return 0;
 }
-
-

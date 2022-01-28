@@ -37,70 +37,99 @@
 GetKeyName(key)
 int key;
 {
-TRACE("GetKeyName");	
-	switch(key)
-	{
-		case K_CR:  return cf_cr_name;
-		case K_ESC: return cf_esc_name;
-	}
-	
-	return "?";
+    TRACE("GetKeyName");
+    switch (key) {
+    case K_CR:
+	return cf_cr_name;
+    case K_ESC:
+	return cf_esc_name;
+    }
+
+    return "?";
 }
 
 /* Return key purpose
    ------------------
 */
-char * GetKeyWhat(key)
+char *GetKeyWhat(key)
 int key;
 {
-	/* Max. length of 8 chars., see MenuHelp() */
-	TRACE("GetKeyWhat"); 
-	switch(key)
-	{
-		case K_UP:      return "Up";
-		case K_DOWN:    return "Down";
-		case K_LEFT:    return "Left";
-		case K_RIGHT:   return "Right";
-		case K_BEGIN:   return "Begin";
-		case K_END:     return "End";
-		case K_TOP:     return "Top";
-		case K_BOTTOM:  return "Bottom";
-		case K_PGUP:    return "PgUp";
-		case K_PGDOWN:  return "PgDown";
-		case K_TAB:     return "Indent";
-		case K_CR:      return "NewLine";
-		case K_ESC:     return "Escape";
-		case K_RDEL:    return "DelRight";
-		case K_LDEL:    return "DelLeft";
-		case K_CUT:     return "Cut";
-		case K_COPY:    return "Copy";
-		case K_PASTE:   return "Paste";
-		case K_DELETE:  return "Delete";
-		case K_CLRCLP:  return "ClearClip";
+    /* Max. length of 8 chars., see MenuHelp() */
+    TRACE("GetKeyWhat");
+    switch (key) {
+    case K_UP:
+	return "Up";
+    case K_DOWN:
+	return "Down";
+    case K_LEFT:
+	return "Left";
+    case K_RIGHT:
+	return "Right";
+    case K_BEGIN:
+	return "Begin";
+    case K_END:
+	return "End";
+    case K_TOP:
+	return "Top";
+    case K_BOTTOM:
+	return "Bottom";
+    case K_PGUP:
+	return "PgUp";
+    case K_PGDOWN:
+	return "PgDown";
+    case K_TAB:
+	return "Indent";
+    case K_CR:
+	return "NewLine";
+    case K_ESC:
+	return "Escape";
+    case K_RDEL:
+	return "DelRight";
+    case K_LDEL:
+	return "DelLeft";
+    case K_CUT:
+	return "Cut";
+    case K_COPY:
+	return "Copy";
+    case K_PASTE:
+	return "Paste";
+    case K_DELETE:
+	return "Delete";
+    case K_CLRCLP:
+	return "ClearClip";
 #if OPT_FIND
-		case K_FIND:    return "Find";
-		case K_NEXT:    return "FindNext";
+    case K_FIND:
+	return "Find";
+    case K_NEXT:
+	return "FindNext";
 #endif
 #if OPT_GOTO
-		case K_GOTO:    return "GoLine";
+    case K_GOTO:
+	return "GoLine";
 #endif
 #if OPT_LWORD
-		case K_LWORD:   return "WordLeft";
+    case K_LWORD:
+	return "WordLeft";
 #endif
 #if OPT_RWORD
-		case K_RWORD:   return "WordRight";
+    case K_RWORD:
+	return "WordRight";
 #endif
 #if OPT_BLOCK
-		case K_BLK_START:  return "BlockStart";
-		case K_BLK_END:    return "BlockEnd";
-		case K_BLK_UNSET:  return "BlockUnset";
+    case K_BLK_START:
+	return "BlockStart";
+    case K_BLK_END:
+	return "BlockEnd";
+    case K_BLK_UNSET:
+	return "BlockUnset";
 #endif
 #if OPT_MACRO
-		case K_MACRO:   return "Macro";
+    case K_MACRO:
+	return "Macro";
 #endif
-	}
+    }
 
-	return "?";
+    return "?";
 }
 
 /* Return key from keyboard, according to key bindings
@@ -108,36 +137,33 @@ int key;
 */
 GetKey()
 {
-	int c, x, i, k;
-TRACE("GetKey");
-	c = CrtIn();
-	if(c > 31 && c != 127) {
-		return c;
-	}
-	for(i = 0; i < KEYS_MAX; ++i) {
-		if(cf_keys[i]) {
-			if(c == cf_keys[i]) {
-				if(cf_keys_ex[i]) {
-					x = toupper(CrtIn());
-					/* TODO: try to optimize the following */
+    int c, x, i, k;
+    TRACE("GetKey");
+    c = CrtIn();
+    if (c > 31 && c != 127) {
+	return c;
+    }
+    for (i = 0; i < KEYS_MAX; ++i) {
+	if (cf_keys[i]) {
+	    if (c == cf_keys[i]) {
+		if (cf_keys_ex[i]) {
+		    x = toupper(CrtIn());
+		    /* TODO: try to optimize the following */
 
-					for(k = i; k < KEYS_MAX; ++k) {
-						if(c == cf_keys[k]) {
-							if(x == cf_keys_ex[k]) {
-								return k + 1000;
-							}
-						}
-					}
-					break;
-				}
-				else {
-					return i + 1000;
-				}
+		    for (k = i; k < KEYS_MAX; ++k) {
+			if (c == cf_keys[k]) {
+			    if (x == cf_keys_ex[k]) {
+				return k + 1000;
+			    }
 			}
+		    }
+		    break;
+		} else {
+		    return i + 1000;
 		}
+	    }
 	}
+    }
 
-	return '?';
+    return '?';
 }
-
-

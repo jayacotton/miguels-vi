@@ -34,14 +34,14 @@
 char *AllocMem(bytes)
 unsigned int bytes;
 {
-	char *p;
-TRACE("AllocMem");
+    char *p;
+    TRACE("AllocMem");
 
-	if(!(p = malloc(bytes))) {
-		ErrLineMem();
-	}
+    if (!(p = malloc(bytes))) {
+	ErrLineMem();
+    }
 
-	return p;
+    return p;
 }
 
 /* Free array
@@ -51,22 +51,22 @@ TRACE("AllocMem");
 int FreeArray(arr, count, flag)
 int *arr, count, flag;
 {
-	int i;
+    int i;
 
-TRACE("FreeArray");
-	for(i = 0; i < count; ++i) {
-		if(arr[i]) {
-			free(arr[i]);
+    TRACE("FreeArray");
+    for (i = 0; i < count; ++i) {
+	if (arr[i]) {
+	    free(arr[i]);
 
-			arr[i] = NULL;
-		}
+	    arr[i] = NULL;
 	}
+    }
 
-	if(flag) {
-		free(arr);
-	}
+    if (flag) {
+	free(arr);
+    }
 
-	return NULL;
+    return NULL;
 }
 
 #if OPT_MACRO
@@ -77,10 +77,8 @@ TRACE("FreeArray");
 MatchStr(s1, s2)
 char *s1, *s2;
 {
-TRACE("MatchStr");
-	return !strcmp(s1, s2);
+    TRACE("MatchStr");
+    return !strcmp(s1, s2);
 }
 
 #endif
-
-

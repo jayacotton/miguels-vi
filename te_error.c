@@ -32,18 +32,17 @@
 void ErrLine(s)
 char *s;
 {
-TRACE("ErrLine");
-	SysLineCont(s);
-	
-	/* Restore system message and cursor position when editing */
-	if(editln)
-	{
-		SysLineEdit();
-		
-		sysln = 0;
-		
-		CrtLocate(BOX_ROW + box_shr, box_shc + cf_num);
-	}
+    TRACE("ErrLine");
+    SysLineCont(s);
+
+    /* Restore system message and cursor position when editing */
+    if (editln) {
+	SysLineEdit();
+
+	sysln = 0;
+
+	CrtLocate(BOX_ROW + box_shr, box_shc + cf_num);
+    }
 }
 
 /* No memory error
@@ -51,8 +50,8 @@ TRACE("ErrLine");
 */
 void ErrLineMem()
 {
-TRACE("ErrLineMem");
-	ErrLine("Not enough memory");
+    TRACE("ErrLineMem");
+    ErrLine("Not enough memory");
 }
 
 /* Line too long error
@@ -60,8 +59,8 @@ TRACE("ErrLineMem");
 */
 void ErrLineLong()
 {
-TRACE("ErrLineLong");
-	ErrLine("Line too long");
+    TRACE("ErrLineLong");
+    ErrLine("Line too long");
 }
 
 /* Can't open file error
@@ -69,8 +68,8 @@ TRACE("ErrLineLong");
 */
 void ErrLineOpen()
 {
-TRACE("ErrLineOpen");
-	ErrLine("Can't open");
+    TRACE("ErrLineOpen");
+    ErrLine("Can't open");
 }
 
 /* Too many lines error
@@ -78,8 +77,8 @@ TRACE("ErrLineOpen");
 */
 void ErrLineTooMany()
 {
-TRACE("ErrLineTooMany");
-	ErrLine("Too many lines");
+    TRACE("ErrLineTooMany");
+    ErrLine("Too many lines");
 }
 
 

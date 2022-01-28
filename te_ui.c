@@ -43,18 +43,17 @@
 	25 Sep 2021 : Added SysLineEdit(). Fix URLs.
 	01 Nov 2021 : Added menu option when macros are enabled: insert file.
 */
-extern void CrtOut(int );
+extern void CrtOut(int);
 
 /* Read character from keyboard
    ----------------------------
 */
-/* **************************** SEE #define
-getchr()
+/*
+int getchr()
 {
 	return GetKey();
 }
-******************************* */
-
+*/
 /* Print character on screen
    -------------------------
 */
@@ -73,10 +72,10 @@ int ch;
 void putchrx(ch, n)
 int ch, n;
 {
-TRACE("putchrx");
-	while(n--) {
-		CrtOut(ch);
-	}
+    TRACE("putchrx");
+    while (n--) {
+	CrtOut(ch);
+    }
 }
 
 /* Print string on screen
@@ -85,41 +84,37 @@ TRACE("putchrx");
 #if OPT_Z80
 /* putstr(s) */
 /* char *s;  */
+// *INDENT-OFF*
 #asm
 putstr:
-	pop  bc
-	pop  hl
-	push hl
-	push bc
-	
-putstr1:
-	ld   a,(hl)
-	or   a
-	ret  z
-	
-	inc  hl
-	push hl
-	
-	ld   h,0
-	ld   l,a
-	push hl
-	
-	call CrtOut
-	
-	pop  de
-	pop  hl
-	
-	jp   putstr1
+	pop bc 
+	pop hl 
+	push hl 
+	push bc 
+putstr1: 
+	ld a, (hl)
+     	or a
+       ret z
+       inc hl
+       push hl 
+	ld h, 0 
+	ld l, a 
+	push hl 
+	call CrtOut 
+	pop de 
+	pop hl 
+	jp putstr1
 #endasm
+// *INDENT-ON*
 #else
 void putstr(s)
 char *s;
 {
-TRACE("putstr");
-	while(*s)
-		CrtOut(*s++);
-}		
-#endif		
+    TRACE("putstr");
+    while (*s)
+	CrtOut(*s++);
+}
+#endif
 
 /* Print string + '\n' on screen
    -----------------------------
@@ -127,22 +122,24 @@ TRACE("putstr");
 void putln(s)
 char *s;
 {
-TRACE("putln");
-	putstr(s); CrtOut('\n');
+    TRACE("putln");
+    putstr(s);
+    CrtOut('\n');
 }
 
 /* Print number on screen
    ----------------------
 */
 void putint(format, value)
-char *format; int value;
+char *format;
+int value;
 {
-	char r[7]; /* -12345 + ZERO */
+    char r[7];			/* -12345 + ZERO */
 
-TRACE("putint");
-	sprintf(r, format, value);
+    TRACE("putint");
+    sprintf(r, format, value);
 
-	putstr(r);
+    putstr(r);
 }
 
 /* Print program layout
@@ -150,47 +147,47 @@ TRACE("putint");
 */
 void Layout()
 {
-	int i, k, w;
+    int i, k, w;
 
-TRACE("Layout");
-	/* Clear screen */
-	CrtClear();
+    TRACE("Layout");
+    /* Clear screen */
+    CrtClear();
 
-	/* Header */
-	putstr("te:");
+    /* Header */
+    putstr("te:");
 
-	/* Information layout */
-	CrtLocate(PS_ROW, PS_INF); putstr(PS_TXT);
+    /* Information layout */
+    CrtLocate(PS_ROW, PS_INF);
+    putstr(PS_TXT);
 
-	/* Max. # of lines */
-	CrtLocate(PS_ROW, PS_LIN_MAX); putint("%04d", cf_mx_lines);
+    /* Max. # of lines */
+    CrtLocate(PS_ROW, PS_LIN_MAX);
+    putint("%04d", cf_mx_lines);
 
-	/* # of columns */
-	CrtLocate(PS_ROW, PS_COL_MAX); putint("%02d", 1 + ln_max);
+    /* # of columns */
+    CrtLocate(PS_ROW, PS_COL_MAX);
+    putint("%02d", 1 + ln_max);
 
-	/* Ruler */
+    /* Ruler */
 #if CRT_LONG
-	CrtLocate(BOX_ROW - 1, cf_num);
+    CrtLocate(BOX_ROW - 1, cf_num);
 
-	w = cf_cols - cf_num;
+    w = cf_cols - cf_num;
 
-	for(i = k = 0; i < w; ++i)
-	{
-		if(k++)
-		{
-			CrtOut(cf_rul_chr);
+    for (i = k = 0; i < w; ++i) {
+	if (k++) {
+	    CrtOut(cf_rul_chr);
 
-			if(k == cf_tab_cols)
-				k = 0;
-		}
-		else
-			CrtOut(cf_rul_tab);
-	}
+	    if (k == cf_tab_cols)
+		k = 0;
+	} else
+	    CrtOut(cf_rul_tab);
+    }
 
-	/* System line separator */
-	CrtLocate(cf_rows - 2, 0);
+    /* System line separator */
+    CrtLocate(cf_rows - 2, 0);
 
-	putchrx(cf_horz_chr, cf_cols);
+    putchrx(cf_horz_chr, cf_cols);
 #endif
 }
 
@@ -199,14 +196,14 @@ TRACE("Layout");
 */
 void ShowFilename()
 {
-	char *s;
-TRACE("ShowFilename");
+    char *s;
+    TRACE("ShowFilename");
 
-	CrtLocate(PS_ROW, PS_FNAME);
+    CrtLocate(PS_ROW, PS_FNAME);
 
-	putstr((s = (char *)CurrentFile()));
+    putstr((s = (char *) CurrentFile()));
 
-	putchrx(' ', FILENAME_MAX - strlen(s) - 1);
+    putchrx(' ', FILENAME_LEN - strlen(s) - 1);
 }
 
 /* Print message on system line
@@ -216,14 +213,14 @@ TRACE("ShowFilename");
 void SysLine(s)
 char *s;
 {
-TRACE("SysLine");
-	CrtClearLine(cf_rows - 1);
+    TRACE("SysLine");
+    CrtClearLine(cf_rows - 1);
 
-	if(s)
-		putstr(s);
+    if (s)
+	putstr(s);
 
-	/* Set flag for Loop() */
-	sysln = 1;
+    /* Set flag for Loop() */
+    sysln = 1;
 }
 
 /* Print message when editing
@@ -231,8 +228,9 @@ TRACE("SysLine");
 */
 void SysLineEdit()
 {
-TRACE("SysLineEdit");
-	SysLine(GetKeyName(K_ESC));	putstr(" = menu");
+    TRACE("SysLineEdit");
+    SysLine(GetKeyName(K_ESC));
+    putstr(" = menu");
 }
 
 /* Print message on system line and wait
@@ -243,43 +241,45 @@ TRACE("SysLineEdit");
 SysLineWait(s, cr, esc)
 char *s, *cr, *esc;
 {
-	int ch;
+    int ch;
 
-TRACE("SysLineWait");
-	SysLine(s);
+    TRACE("SysLineWait");
+    SysLine(s);
 
-	if(s)
-		putstr(" (");
+    if (s)
+	putstr(" (");
 
-	if(cr)
-	{
-		putstr(GetKeyName(K_CR)); putstr(" = "); putstr(cr); putstr(", ");
-	}
+    if (cr) {
+	putstr(GetKeyName(K_CR));
+	putstr(" = ");
+	putstr(cr);
+	putstr(", ");
+    }
 
-	if(esc)
-	{
-		putstr(GetKeyName(K_ESC)); putstr(" = "); putstr(esc);
-	}
+    if (esc) {
+	putstr(GetKeyName(K_ESC));
+	putstr(" = ");
+	putstr(esc);
+    }
 
-	if(s)
-		CrtOut(')');
+    if (s)
+	CrtOut(')');
 
-	putstr(": ");
+    putstr(": ");
 
-	for(;;)
-	{
-		ch = GetKey();
+    for (;;) {
+	ch = GetKey();
 
-		if(cr && ch == K_CR)
-			break;
+	if (cr && ch == K_CR)
+	    break;
 
-		if(esc && ch == K_ESC)
-			break;
-	}
+	if (esc && ch == K_ESC)
+	    break;
+    }
 
-	SysLine(NULL);
+    SysLine(NULL);
 
-	return (ch == K_CR);
+    return (ch == K_CR);
 }
 
 
@@ -291,8 +291,8 @@ TRACE("SysLineWait");
 void SysLineCont(s)
 char *s;
 {
-TRACE("SysLineCont");
-	SysLineWait(s, NULL, "continue");
+    TRACE("SysLineCont");
+    SysLineWait(s, NULL, "continue");
 }
 
 /* Print message on system line and wait
@@ -303,8 +303,8 @@ TRACE("SysLineCont");
 void SysLineBack(s)
 char *s;
 {
-TRACE("SysLineBack");
-	SysLineWait(s, NULL, "back");
+    TRACE("SysLineBack");
+    SysLineWait(s, NULL, "back");
 }
 
 /* Print message on system line and wait
@@ -315,8 +315,8 @@ TRACE("SysLineBack");
 SysLineConf(s)
 char *s;
 {
-TRACE("SysLineConf");
-	return SysLineWait(s, "continue", "cancel");
+    TRACE("SysLineConf");
+    return SysLineWait(s, "continue", "cancel");
 }
 
 /* Ask for a string
@@ -324,24 +324,25 @@ TRACE("SysLineConf");
    Return NZ if entered, else Z.
 */
 SysLineStr(what, buf, maxlen)
-char *what, *buf; int maxlen;
+char *what, *buf;
+int maxlen;
 {
-	int ch;
+    int ch;
 
-TRACE("SysLineStr");
-	SysLine(what);
-	putstr(" (");
-	putstr(GetKeyName(K_ESC));
-	putstr(" = cancel): ");
+    TRACE("SysLineStr");
+    SysLine(what);
+    putstr(" (");
+    putstr(GetKeyName(K_ESC));
+    putstr(" = cancel): ");
 
-	ch = ReadLine(buf, maxlen);
+    ch = ReadLine(buf, maxlen);
 
-	SysLine(NULL);
+    SysLine(NULL);
 
-	if(ch == K_CR && *buf)
-			return 1;
+    if (ch == K_CR && *buf)
+	return 1;
 
-	return 0;
+    return 0;
 }
 
 /* Ask for a filename
@@ -351,8 +352,8 @@ TRACE("SysLineStr");
 SysLineFile(fn)
 char *fn;
 {
-TRACE("SysLineFile");
-	return SysLineStr("Filename", fn, FILENAME_MAX - 1);
+    TRACE("SysLineFile");
+    return SysLineStr("Filename", fn, FILENAME_LEN - 1);
 }
 
 /* Ask for confirmation on changes not saved
@@ -361,8 +362,8 @@ TRACE("SysLineFile");
 */
 SysLineChanges()
 {
-TRACE("SysLineChanges");
-	return SysLineConf("Changes will be lost!");
+    TRACE("SysLineChanges");
+    return SysLineConf("Changes will be lost!");
 }
 
 /* Read simple line
@@ -373,36 +374,36 @@ int ReadLine(buf, width)
 char *buf;
 int width;
 {
-	int len;
-	int ch;
+    int len;
+    int ch;
 
-TRACE("ReadLine");
-	putstr(buf); len=strlen(buf);
+    TRACE("ReadLine");
+    putstr(buf);
+    len = strlen(buf);
 
-	while(1)
-	{
-		ch = GetKey();
-		switch(ch)
-		{
-			case K_LDEL :
-				if(len)
-				{
-					CrtOut('\b'); CrtOut(' '); CrtOut('\b');
+    while (1) {
+	ch = GetKey();
+	switch (ch) {
+	case K_LDEL:
+	    if (len) {
+		CrtOut('\b');
+		CrtOut(' ');
+		CrtOut('\b');
 
-					--len;
-				}
-				break;
-			case K_CR :
-			case K_ESC :
-				buf[len] = 0;
-				return ch;
-			default :
-				if(len < width && ch >= ' ')
-					CrtOut(buf[len++] = ch);
-				break;
-		}
+		--len;
+	    }
+	    break;
+	case K_CR:
+	case K_ESC:
+	    buf[len] = 0;
+	    return ch;
+	default:
+	    if (len < width && ch >= ' ')
+		CrtOut(buf[len++] = ch);
+	    break;
 	}
-	return 0;
+    }
+    return 0;
 }
 
 /* Return name of current file
@@ -410,8 +411,8 @@ TRACE("ReadLine");
 */
 CurrentFile()
 {
-TRACE("CurrentFile");
-	return (file_name[0] ? file_name : "-");
+    TRACE("CurrentFile");
+    return (file_name[0] ? file_name : "-");
 }
 
 /* Clear the editor box
@@ -419,23 +420,24 @@ TRACE("CurrentFile");
 */
 void ClearBox()
 {
-	int i;
+    int i;
 
-TRACE("ClearBox");
-	for(i = 0; i < box_rows; ++i)
-		CrtClearLine(BOX_ROW + i);
+    TRACE("ClearBox");
+    for (i = 0; i < box_rows; ++i)
+	CrtClearLine(BOX_ROW + i);
 }
 
 /* Print centered text on the screen
    ---------------------------------
 */
 void CenterText(row, txt)
-int row; char *txt;
+int row;
+char *txt;
 {
-TRACE("CenterText");
-	CrtLocate(row, (cf_cols - strlen(txt)) / 2);
+    TRACE("CenterText");
+    CrtLocate(row, (cf_cols - strlen(txt)) / 2);
 
-	putstr(txt);
+    putstr(txt);
 }
 
 #if OPT_BLOCK
@@ -447,40 +449,40 @@ TRACE("CenterText");
 void RefreshBlock(row, sel)
 int row, sel;
 {
-	int i, line;
+    int i, line;
 
-TRACE("RefreshBlock");
-	line = GetFirstLine() + row;
+    TRACE("RefreshBlock");
+    line = GetFirstLine() + row;
 
-	for(i = row; i < box_rows; ++i) {
-		if(line >= blk_start) {
-			if(line <= blk_end) {
+    for (i = row; i < box_rows; ++i) {
+	if (line >= blk_start) {
+	    if (line <= blk_end) {
 #if CRT_CAN_REV
-				CrtLocate(BOX_ROW + i, cf_num);
-				CrtClearEol();
+		CrtLocate(BOX_ROW + i, cf_num);
+		CrtClearEol();
 
-				if(sel) {
-					CrtReverse(1);
-				}
-
-				putstr(lp_arr[line]);
-				CrtOut(' ');
-
-				if(sel) {
-
-					CrtReverse(0);
-				}
-#else
-				CrtLocate(BOX_ROW + i, cf_cols - 1); CrtOut(sel ? BLOCK_CHR : ' ');
-#endif
-			}
-			else {
-				break;
-			}
+		if (sel) {
+		    CrtReverse(1);
 		}
 
-		++line;
+		putstr(lp_arr[line]);
+		CrtOut(' ');
+
+		if (sel) {
+
+		    CrtReverse(0);
+		}
+#else
+		CrtLocate(BOX_ROW + i, cf_cols - 1);
+		CrtOut(sel ? BLOCK_CHR : ' ');
+#endif
+	    } else {
+		break;
+	    }
 	}
+
+	++line;
+    }
 }
 
 #endif
@@ -492,71 +494,69 @@ TRACE("RefreshBlock");
 void Refresh(row, line)
 int row, line;
 {
-	int i;
-	char *format;
+    int i;
+    char *format;
 
-TRACE("Refresh");
+    TRACE("Refresh");
 #if OPT_BLOCK
 
-	int blk, sel;
+    int blk, sel;
 
-	blk = (blk_count && blk_start <= GetLastLine() && blk_end >= GetFirstLine());
-	sel = 0;
+    blk = (blk_count && blk_start <= GetLastLine()
+	   && blk_end >= GetFirstLine());
+    sel = 0;
 
 #endif
 
-	if(cf_num) {
-		format = "%?d";
-		format[1] = '0' + cf_num - 1;
-	}
+    if (cf_num) {
+	format = "%?d";
+	format[1] = '0' + cf_num - 1;
+    }
 
-	for(i = row; i < box_rows; ++i)
-	{
-		CrtClearLine(BOX_ROW + i);
+    for (i = row; i < box_rows; ++i) {
+	CrtClearLine(BOX_ROW + i);
 
-		if(line < lp_now) {
+	if (line < lp_now) {
 
-			if(cf_num) {
-						putint(format, line + 1);
-						CrtOut(cf_lnum_chr);
-			}
-
+	    if (cf_num) {
+		putint(format, line + 1);
+		CrtOut(cf_lnum_chr);
+	    }
 #if OPT_BLOCK
 
-			if(blk) {
-				if(line >= blk_start) {
-					if(line <= blk_end) {
+	    if (blk) {
+		if (line >= blk_start) {
+		    if (line <= blk_end) {
 #if CRT_CAN_REV
-						CrtReverse((sel = 1));
+			CrtReverse((sel = 1));
 #else
-						sel = 1;
+			sel = 1;
 #endif
-					}
-				}
-			}
-
-#endif
-
-			putstr(lp_arr[line++]);
-
-#if OPT_BLOCK
-
-			if(sel) {
-#if CRT_CAN_REV
-				CrtOut(' ');
-
-				CrtReverse((sel = 0));
-#else
-				sel = 0;
-
-				CrtLocate(BOX_ROW + i, cf_cols - 1); CrtOut(BLOCK_CHR);
-#endif
-			}
-
-#endif
-
+		    }
 		}
+	    }
+#endif
+
+	    putstr(lp_arr[line++]);
+
+#if OPT_BLOCK
+
+	    if (sel) {
+#if CRT_CAN_REV
+		CrtOut(' ');
+
+		CrtReverse((sel = 0));
+#else
+		sel = 0;
+
+		CrtLocate(BOX_ROW + i, cf_cols - 1);
+		CrtOut(BLOCK_CHR);
+#endif
+	    }
+#endif
+
 	}
+    }
 }
 
 /* Refresh editor box
@@ -564,8 +564,8 @@ TRACE("Refresh");
 */
 void RefreshAll()
 {
-TRACE("RefreshAll");
-	Refresh(0, lp_cur - box_shr);
+    TRACE("RefreshAll");
+    Refresh(0, lp_cur - box_shr);
 }
 
 /* Show the menu
@@ -574,84 +574,100 @@ TRACE("RefreshAll");
 */
 Menu()
 {
-	int run, row, stay, menu, ask;
-TRACE("Menu");
+    int run, row, stay, menu, ask;
+    TRACE("Menu");
 
-	/* Setup some things */
-	run = stay = menu = ask = 1;
+    /* Setup some things */
+    run = stay = menu = ask = 1;
 
-	/* Loop */
-	while(run)
-	{
-		/* Show the menu */
-		if(menu)
-		{
-			row = BOX_ROW + 1;
+    /* Loop */
+    while (run) {
+	/* Show the menu */
+	if (menu) {
+	    row = BOX_ROW + 1;
 
-			ClearBox();
+	    ClearBox();
 
-			CenterText(row++, "OPTIONS");
-			row++;
+	    CenterText(row++, "OPTIONS");
+	    row++;
 #if CRT_LONG
-			CenterText(row++, "New");
-			CenterText(row++, "Open");
-			CenterText(row++, "Save");
-			CenterText(row++, "save As");
+	    CenterText(row++, "New");
+	    CenterText(row++, "Open");
+	    CenterText(row++, "Save");
+	    CenterText(row++, "save As");
 #if OPT_MACRO
-			CenterText(row++, "Insert");
-#endif			
-			CenterText(row++, "Help");
-			CenterText(row++, "aBout te");
-			CenterText(row  , "eXit te");
+	    CenterText(row++, "Insert");
+#endif
+	    CenterText(row++, "Help");
+	    CenterText(row++, "aBout te");
+	    CenterText(row, "eXit te");
 #else
 #if OPT_MACRO
-			CenterText(row++, "New     Open  Save      Save As");
-			CenterText(row++, "Insert  Help  aBout te  eXit te");
+	    CenterText(row++, "New     Open  Save      Save As");
+	    CenterText(row++, "Insert  Help  aBout te  eXit te");
 #else
-			CenterText(row++, "New   Open      Save     Save As");
-			CenterText(row++, "Help  aBout te  eXit te         ");
-#endif			
+	    CenterText(row++, "New   Open      Save     Save As");
+	    CenterText(row++, "Help  aBout te  eXit te         ");
 #endif
-			menu = 0;
-		}
-
-		/* Ask for option */
-		if(ask)
-		{
-			SysLine("Option (");
-			putstr(GetKeyName(K_ESC));
-			putstr(" = back): ");
-		}
-		else
-		{
-			ask = 1;
-		}
-
-		/* Do it */
-		switch(toupper(GetKey()))
-		{
-			case 'N'   : run = MenuNew(); break;
-			case 'O'   : run = MenuOpen(); break;
-			case 'S'   : run = MenuSave(); break;
-			case 'A'   : run = MenuSaveAs(); break;
-#if OPT_MACRO
-			case 'I'   : run = MenuInsert(); break;
 #endif
-			case 'B'   : MenuAbout(); menu = 1; break;
-			case 'H'   : MenuHelp(); menu = 1; break;
-			case 'X'   : run = stay = MenuExit(); break;
-			case K_ESC : run = 0; break;
-			default    : ask = 0; break;
-		}
+	    menu = 0;
 	}
 
-	/* Clear editor box */
-	ClearBox();
+	/* Ask for option */
+	if (ask) {
+	    SysLine("Option (");
+	    putstr(GetKeyName(K_ESC));
+	    putstr(" = back): ");
+	} else {
+	    ask = 1;
+	}
 
-	SysLine(NULL);
+	/* Do it */
+	switch (toupper(GetKey())) {
+	case 'N':
+	    run = MenuNew();
+	    break;
+	case 'O':
+	    run = MenuOpen();
+	    break;
+	case 'S':
+	    run = MenuSave();
+	    break;
+	case 'A':
+	    run = MenuSaveAs();
+	    break;
+#if OPT_MACRO
+	case 'I':
+	    run = MenuInsert();
+	    break;
+#endif
+	case 'B':
+	    MenuAbout();
+	    menu = 1;
+	    break;
+	case 'H':
+	    MenuHelp();
+	    menu = 1;
+	    break;
+	case 'X':
+	    run = stay = MenuExit();
+	    break;
+	case K_ESC:
+	    run = 0;
+	    break;
+	default:
+	    ask = 0;
+	    break;
+	}
+    }
 
-	/* Return NZ to quit the program */
-	return !stay;
+    /* Clear editor box */
+    ClearBox();
+
+    SysLine(NULL);
+
+    /* Return NZ to quit the program */
+    return !stay;
 }
 
 /* Menu option: New
@@ -660,16 +676,15 @@ TRACE("Menu");
 */
 MenuNew()
 {
-TRACE("MenuNew");
-	if(lp_chg)
-	{
-		if(!SysLineChanges())
-			return 1;
-	}
+    TRACE("MenuNew");
+    if (lp_chg) {
+	if (!SysLineChanges())
+	    return 1;
+    }
 
-	NewFile();
+    NewFile();
 
-	return 0;
+    return 0;
 }
 
 /* Menu option: Open
@@ -678,28 +693,26 @@ TRACE("MenuNew");
 */
 MenuOpen()
 {
-	char fn[FILENAME_MAX];
+    char fn[FILENAME_LEN];
 
-TRACE("MenuOpen");
-	if(lp_chg)
-	{
-		if(!SysLineChanges())
-			return 1;
-	}
+    TRACE("MenuOpen");
+    if (lp_chg) {
+	if (!SysLineChanges())
+	    return 1;
+    }
 
-	fn[0] = 0;
+    fn[0] = 0;
 
-	if(SysLineFile(fn))
-	{
-		if(ReadFile(fn))
-			NewFile();
-		else
-			strcpy(file_name, fn);
+    if (SysLineFile(fn)) {
+	if (ReadFile(fn))
+	    NewFile();
+	else
+	    strcpy(file_name, fn);
 
-		return 0;
-	}
+	return 0;
+    }
 
-	return 1;
+    return 1;
 }
 
 /* Menu option: Save
@@ -708,13 +721,13 @@ TRACE("MenuOpen");
 */
 MenuSave()
 {
-TRACE("MenuSave");
-	if(!file_name[0])
-		return MenuSaveAs();
+    TRACE("MenuSave");
+    if (!file_name[0])
+	return MenuSaveAs();
 
-	WriteFile(file_name);
+    WriteFile(file_name);
 
-	return 1;
+    return 1;
 }
 
 /* Menu option: Save as
@@ -723,20 +736,19 @@ TRACE("MenuSave");
 */
 MenuSaveAs()
 {
-	char fn[FILENAME_MAX];
+    char fn[FILENAME_LEN];
 
-TRACE("MenuSaveAs");
-	strcpy(fn, file_name);
+    TRACE("MenuSaveAs");
+    strcpy(fn, file_name);
 
-	if(SysLineFile(fn))
-	{
-		if(!WriteFile(fn))
-			strcpy(file_name, fn);
+    if (SysLineFile(fn)) {
+	if (!WriteFile(fn))
+	    strcpy(file_name, fn);
 
-		return 0;
-	}
+	return 0;
+    }
 
-	return 1;
+    return 1;
 }
 
 #if OPT_MACRO
@@ -747,17 +759,16 @@ TRACE("MenuSaveAs");
 */
 MenuInsert()
 {
-	char fn[FILENAME_MAX];
+    char fn[FILENAME_LEN];
 
-TRACE("MenuInsert");
-	fn[0] = 0;
+    TRACE("MenuInsert");
+    fn[0] = 0;
 
-	if(SysLineFile(fn))
-	{
-		return MacroRunFile(fn, 1);
-	}
+    if (SysLineFile(fn)) {
+	return MacroRunFile(fn, 1);
+    }
 
-	return 1;
+    return 1;
 }
 
 #endif
@@ -767,73 +778,75 @@ TRACE("MenuInsert");
 */
 void MenuHelp()
 {
-	int i, k;
-	char *s;
+    int i, k;
+    char *s;
 
-TRACE("MenuHelp");
-	ClearBox();
+    TRACE("MenuHelp");
+    ClearBox();
 
-	CrtLocate(BOX_ROW + 1, 0);
+    CrtLocate(BOX_ROW + 1, 0);
 
-	putln("HELP:\n");
+    putln("HELP:\n");
 
 #if CRT_LONG
 
-	for(i = 0; help_items[i] != -1; ++i) {
+    for (i = 0; help_items[i] != -1; ++i) {
 
-		// 123456789012345 (15 characters)
-		// BlkEnd     ^B^E
+	// 123456789012345 (15 characters)
+	// BlkEnd     ^B^E
 
-		if((k = help_items[i])) {
-			if(*(s = GetKeyWhat(k)) == '?') {
-				k = 0;
-			}
-		}
-
-		if(k) {
-			putstr(s); putchrx(' ', 11 - strlen(s));
-
-			k -= 1000;
-
-			MenuHelpCh(cf_keys[k]);
-			MenuHelpCh(cf_keys_ex[k]);
-		}
-		else {
-			putchrx(' ', 15);
-		}
-
-		if((i + 1) % 3) {
-			CrtOut(' '); CrtOut(cf_vert_chr); CrtOut(' ');
-		}
-		else {
-			CrtOut('\n');
-		}
+	if ((k = help_items[i])) {
+	    if (*(s = GetKeyWhat(k)) == '?') {
+		k = 0;
+	    }
 	}
+
+	if (k) {
+	    putstr(s);
+	    putchrx(' ', 11 - strlen(s));
+
+	    k -= 1000;
+
+	    MenuHelpCh(cf_keys[k]);
+	    MenuHelpCh(cf_keys_ex[k]);
+	} else {
+	    putchrx(' ', 15);
+	}
+
+	if ((i + 1) % 3) {
+	    CrtOut(' ');
+	    CrtOut(cf_vert_chr);
+	    CrtOut(' ');
+	} else {
+	    CrtOut('\n');
+	}
+    }
 
 #else
 
-	putstr("Sorry, no help is available.");
+    putstr("Sorry, no help is available.");
 
 #endif
 
-	SysLineBack(NULL);
+    SysLineBack(NULL);
 }
 
 void MenuHelpCh(ch)
 int ch;
 {
-TRACE("MenuHelpCH");
-	if(ch) {
-		if(ch < 32 || ch == 0x7F) {
-			CrtOut('^'); CrtOut(ch != 0x7F ? '@' + ch : '?');
-		}
-		else {
-			CrtOut(ch); CrtOut(' ');
-		}
+    TRACE("MenuHelpCH");
+    if (ch) {
+	if (ch < 32 || ch == 0x7F) {
+	    CrtOut('^');
+	    CrtOut(ch != 0x7F ? '@' + ch : '?');
+	} else {
+	    CrtOut(ch);
+	    CrtOut(' ');
 	}
-	else {
-		CrtOut(' '); CrtOut(' ');
-	}
+    } else {
+	CrtOut(' ');
+	CrtOut(' ');
+    }
 }
 
 /* Menu option: About
@@ -841,40 +854,40 @@ TRACE("MenuHelpCH");
 */
 void MenuAbout()
 {
-	int row;
+    int row;
 
-TRACE("MenuAbout");
+    TRACE("MenuAbout");
 #if CRT_LONG
-	row = BOX_ROW + 1;
+    row = BOX_ROW + 1;
 
-	ClearBox();
+    ClearBox();
 
-	CenterText(row++, "te - Text Editor");
-	row++;
-	CenterText(row++, VERSION);
-	row++;
-	CenterText(row++, "Configured for");
-	CenterText(row++, cf_name);
-	row++;
-	CenterText(row++, COPYRIGHT);
-	row++;
-	CenterText(row++, "http://www.floppysoftware.es");
-	CenterText(row++, "https://cpm-connections.blogspot.com");
-	CenterText(row  , "floppysoftware@gmail.com");
+    CenterText(row++, "te - Text Editor");
+    row++;
+    CenterText(row++, VERSION);
+    row++;
+    CenterText(row++, "Configured for");
+    CenterText(row++, cf_name);
+    row++;
+    CenterText(row++, COPYRIGHT);
+    row++;
+    CenterText(row++, "http://www.floppysoftware.es");
+    CenterText(row++, "https://cpm-connections.blogspot.com");
+    CenterText(row, "floppysoftware@gmail.com");
 #else
-	row = BOX_ROW;
+    row = BOX_ROW;
 
-	ClearBox();
+    ClearBox();
 
-	CenterText(row++, "te - Text Editor");
-	CenterText(row++, VERSION);
-	CenterText(row++, "Configured for");
-	CenterText(row++, cf_name);
-	CenterText(row++, COPYRIGHT);
-	CenterText(row++, "www.floppysoftware.es");
+    CenterText(row++, "te - Text Editor");
+    CenterText(row++, VERSION);
+    CenterText(row++, "Configured for");
+    CenterText(row++, cf_name);
+    CenterText(row++, COPYRIGHT);
+    CenterText(row++, "www.floppysoftware.es");
 #endif
 
-	SysLineBack(NULL);
+    SysLineBack(NULL);
 }
 
 /* Menu option: Quit program
@@ -882,14 +895,11 @@ TRACE("MenuAbout");
 */
 MenuExit()
 {
-TRACE("MenuExit");
-	if(lp_chg)
-	{
-		return !SysLineChanges();
-	}
+    TRACE("MenuExit");
+    if (lp_chg) {
+	return !SysLineChanges();
+    }
 
-	/* Quit program */
-	return 0;
+    /* Quit program */
+    return 0;
 }
-
-

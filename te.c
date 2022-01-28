@@ -94,7 +94,6 @@
 #define CC_FGETS
 #define CC_FPUTS
 
-//#include <mescc.h>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -104,8 +103,6 @@
 
 typedef unsigned int WORD;
 
-//#include <fileio.h>
-//#include <sprintf.h>
 
 /* TE definitions
    --------------
@@ -117,70 +114,70 @@ typedef unsigned int WORD;
    ----------------
 */
 
-int cpm_ver;  /* CP/M version */
+int cpm_ver;			/* CP/M version */
 
 /* Array of text lines
    -------------------
 */
-WORD *lp_arr; /* Text lines pointers array */
-int   lp_now; /* How many lines are in the array */
-int   lp_cur; /* Current line */
-int   lp_chg; /* 0 if no changes are made */
+WORD *lp_arr;			/* Text lines pointers array */
+int lp_now;			/* How many lines are in the array */
+int lp_cur;			/* Current line */
+int lp_chg;			/* 0 if no changes are made */
 
 /* Current line
    ------------
 */
-char *ln_dat; /* Data buffer */
-int   ln_max; /* Max. # of characters */
+char *ln_dat;			/* Data buffer */
+int ln_max;			/* Max. # of characters */
 
 /* Clipboard & block selection
    ---------------------------
 */
 #if OPT_BLOCK
 
-int blk_start;   /* Start line # */
-int blk_end;     /* End line # */
-int blk_count;   /* # of lines */
+int blk_start;			/* Start line # */
+int blk_end;			/* End line # */
+int blk_count;			/* # of lines */
 
-WORD *clp_arr;   /* Multi-line */
-int   clp_count; /* # of lines */
+WORD *clp_arr;			/* Multi-line */
+int clp_count;			/* # of lines */
 
 #else
 
-char *clp_line;  /* Just one line */
+char *clp_line;			/* Just one line */
 
 #endif
 
 /* Filename
    --------
 */
-char file_name[FILENAME_MAX];
+char file_name[FILENAME_LEN];
 
 /* Editor box
    ----------
 */
-int box_rows; /* Height in lines */
-int box_shr;  /* Vertical   position of cursor in the box (0..box_rows - 1) */
-int box_shc;  /* Horizontal position of cursor in the box (0..cf_cols - 1) */
+int box_rows;			/* Height in lines */
+int box_shr;			/* Vertical   position of cursor in the box (0..box_rows - 1) */
+int box_shc;			/* Horizontal position of cursor in the box (0..cf_cols - 1) */
 
 /* Keyboard forced entry
    ---------------------
 */
-int *fe_dat;   /* Data buffer */
-int fe_now;    /* How many characters are now in the buffer */
-int fe_set;    /* Set position */
-int fe_get;    /* Get position */
-int fe_forced; /* Flag: true if forced character on input */
+int *fe_dat;			/* Data buffer */
+int fe_now;			/* How many characters are now in the buffer */
+int fe_set;			/* Set position */
+int fe_get;			/* Get position */
+int fe_forced;			/* Flag: true if forced character on input */
 
 /* System line
    -----------
 */
-int sysln;    /* NZ when written - for Loop() */
+int sysln;			/* NZ when written - for Loop() */
 
 /* Edit line
    ---------
 */
-int editln;   /* NZ when editing line - for ErrLine() */
+int editln;			/* NZ when editing line - for ErrLine() */
 
 #if OPT_FIND
 
@@ -196,12 +193,12 @@ char find_str[FIND_MAX];
 /* Macros
    ------
 */
-FILE *mac_fp;              /* FP for a file macro, or NULL */
-/*char *mac_str;*/ /* Address for a string macro, or NULL */
-int mac_raw;               /* NZ for raw mode */
-unsigned char mac_indent;  /* Value of cf_indent */
-unsigned char mac_list;    /* Value of cf_list */
-char mac_sym[MAC_SYM_SIZ]; /* Macro symbol */
+FILE *mac_fp;			/* FP for a file macro, or NULL */
+				     /*char *mac_str; *//* Address for a string macro, or NULL */
+int mac_raw;			/* NZ for raw mode */
+unsigned char mac_indent;	/* Value of cf_indent */
+unsigned char mac_list;		/* Value of cf_list */
+char mac_sym[MAC_SYM_SIZ];	/* Macro symbol */
 
 #endif
 
@@ -209,23 +206,23 @@ char mac_sym[MAC_SYM_SIZ]; /* Macro symbol */
    -----------------
 */
 int help_items[] = {
-	K_UP,        K_DOWN,    K_TAB,
-	K_LEFT,      K_RIGHT,   K_CR,
-	K_BEGIN,     K_END,     K_ESC,
-	K_TOP,       K_BOTTOM,  K_MACRO,
-	K_PGUP,      K_PGDOWN,  0,
-	K_LWORD,     K_RWORD,   0,
-	K_LDEL,      K_RDEL,    0,
-	K_BLK_START, K_BLK_END, K_BLK_UNSET,
-	K_CUT,       K_COPY,    K_PASTE,
-	K_DELETE,    K_CLRCLP,  0,
-	K_FIND,      K_NEXT,    K_GOTO,
-	-1
+    K_UP, K_DOWN, K_TAB,
+    K_LEFT, K_RIGHT, K_CR,
+    K_BEGIN, K_END, K_ESC,
+    K_TOP, K_BOTTOM, K_MACRO,
+    K_PGUP, K_PGDOWN, 0,
+    K_LWORD, K_RWORD, 0,
+    K_LDEL, K_RDEL, 0,
+    K_BLK_START, K_BLK_END, K_BLK_UNSET,
+    K_CUT, K_COPY, K_PASTE,
+    K_DELETE, K_CLRCLP, 0,
+    K_FIND, K_NEXT, K_GOTO,
+    -1
 };
 
 /* TE modules
-   ----------
-*/
+   ---------- */
+
 #include "te_conf.c"
 #include "te_ui.c"
 #include "te_file.c"
@@ -244,120 +241,112 @@ int help_items[] = {
 /* Program entry
    -------------
 */
-//long heap;
 main(argc, argv)
 int argc, argv[];
 {
-	int i;
-TRACE("main");
-	/* Get CP/M version */
-	cpm_ver = bdos(0x0C, 0x0000);
-	
-	/* Adjust auto rows and columns configuration values */
-	cf_rows = GetScrConf(0, cf_rows, CRT_DEF_ROWS);
-	cf_cols = GetScrConf(1, cf_cols, CRT_DEF_COLS);
+    int i;
+    TRACE("main");
+    /* Get CP/M version */
+    cpm_ver = bdos(0x0C, 0x0000);
 
-	/* Setup CRT */
-	CrtSetup();
-	
-	/* Setup some globals */
-#if CRT_LONG	
-	box_rows = cf_rows - 4;
+    /* Adjust auto rows and columns configuration values */
+    cf_rows = GetScrConf(0, cf_rows, CRT_DEF_ROWS);
+    cf_cols = GetScrConf(1, cf_cols, CRT_DEF_COLS);
+
+    /* Setup CRT */
+    CrtSetup();
+
+    /* Setup some globals */
+#if CRT_LONG
+    box_rows = cf_rows - 4;
 #else
-	box_rows = cf_rows - 2;
+    box_rows = cf_rows - 2;
 #endif
-		
-	/* Max. width of lines */
-	ln_max = cf_cols - cf_num - 1;
 
-	/* Print layout */
-	Layout();
+    /* Max. width of lines */
+    ln_max = cf_cols - cf_num - 1;
 
-	/* Allocate buffers -- FIXME -- use AllocMem() ?? */
-	ln_dat = malloc(ln_max + 2);
+    /* Print layout */
+    Layout();
 
-	fe_dat = malloc(FORCED_MAX * sizeof(int));
+    /* Allocate buffers -- FIXME -- use AllocMem() ?? */
+    ln_dat = malloc(ln_max + 2);
 
-	lp_arr = malloc(cf_mx_lines * sizeof(char *));
+    fe_dat = malloc(FORCED_MAX * sizeof(int));
 
-	i = 1;
+    lp_arr = malloc(cf_mx_lines * sizeof(char *));
 
-	if(ln_dat && fe_dat && lp_arr) {
+    i = 1;
+
+    if (ln_dat && fe_dat && lp_arr) {
 
 #if OPT_BLOCK
 #else
 
-		if((clp_line = malloc(ln_max + 1))) {
+	if ((clp_line = malloc(ln_max + 1))) {
 
 #endif
 
-			i = 0;
+	    i = 0;
 
 #if OPT_BLOCK
 #else
 
-		}
-
+	}
 #endif
 
-	}
+    }
 
-	if(i)
-	{
-		ErrLineMem(); CrtReset(); return 1;
-	}
-
-	/* Setup clipboard */
-#if OPT_BLOCK
-
-	clp_arr = NULL;
-	clp_count = 0;
-
-#else
-
-	*clp_line = '\0';
-
-#endif
-
-	/* Setup lines */
-	for(i = 0; i < cf_mx_lines; ++i) {
-		lp_arr[i] = NULL;
-	}
-
-	/* Check command line */
-	if(argc == 1)
-	{
-		NewFile();
-	}
-	else if(argc == 2)
-	{
-		if(strlen(argv[1]) > FILENAME_MAX - 1)
-		{
-			ErrLine("Filename too long");
-
-			NewFile();
-		}
-		else if(ReadFile(argv[1]))
-			NewFile();
-		else
-			strcpy(file_name, argv[1]);
-	}
-	else
-	{
-		ErrLine("Bad command line. Use: te [filename]");
-
-		NewFile();
-	}
-
-	/* Main loop */
-	Loop();
-
-	/* Clear & reset CRT */
-	CrtClear();
+    if (i) {
+	ErrLineMem();
 	CrtReset();
+	return 1;
+    }
 
-	/* Exit */
-	return 0;
+    /* Setup clipboard */
+#if OPT_BLOCK
+
+    clp_arr = NULL;
+    clp_count = 0;
+
+#else
+
+    *clp_line = '\0';
+
+#endif
+
+    /* Setup lines */
+    for (i = 0; i < cf_mx_lines; ++i) {
+	lp_arr[i] = NULL;
+    }
+
+    /* Check command line */
+    if (argc == 1) {
+	NewFile();
+    } else if (argc == 2) {
+	if (strlen(argv[1]) > FILENAME_LEN - 1) {
+	    ErrLine("Filename too long");
+
+	    NewFile();
+	} else if (ReadFile(argv[1]))
+	    NewFile();
+	else
+	    strcpy(file_name, argv[1]);
+    } else {
+	ErrLine("Bad command line. Use: te [filename]");
+
+	NewFile();
+    }
+
+    /* Main loop */
+    Loop();
+
+    /* Clear & reset CRT */
+    CrtClear();
+    CrtReset();
+
+    /* Exit */
+    return 0;
 }
 
 /* Get # of rows / columns on auto configuration value
@@ -366,22 +355,21 @@ TRACE("main");
 GetScrConf(n, val, def_val)
 int n, val, def_val;
 {
-	unsigned char scb_pb[2];
-	
-TRACE("GetScrConf");
-	if(val == 0) {
-		val = def_val;
-		
-		if(cpm_ver >= 0x30) {
-			scb_pb[0] = (n == 0 ? 0x1C : 0x1A);
-			scb_pb[1] = 0;
+    unsigned char scb_pb[2];
 
-			val = bdos(0x31, scb_pb) + 1;
-			//val = bdos_a(0x31, scb_pb) + 1;
-		}
+    TRACE("GetScrConf");
+    if (val == 0) {
+	val = def_val;
+
+	if (cpm_ver >= 0x30) {
+	    scb_pb[0] = (n == 0 ? 0x1C : 0x1A);
+	    scb_pb[1] = 0;
+
+	    val = bdos(0x31, scb_pb) + 1;
 	}
-	
-	return val;
+    }
+
+    return val;
 }
 
 /* Main loop
@@ -389,34 +377,32 @@ TRACE("GetScrConf");
 */
 void Loop()
 {
-	int run, ch;
+    int run, ch;
 
-TRACE("Loop");
-	/* Setup forced entry */
-	fe_now = fe_get = fe_set = 0;
+    TRACE("Loop");
+    /* Setup forced entry */
+    fe_now = fe_get = fe_set = 0;
 
-	/* Setup more things */
-	run = sysln = 1;
+    /* Setup more things */
+    run = sysln = 1;
 
-	/* Print filename */
-	ShowFilename();
+    /* Print filename */
+    ShowFilename();
 
-	/* Refresh editor box */
-	RefreshAll();
+    /* Refresh editor box */
+    RefreshAll();
 
-	/* Loop */
-	while(run)
-	{
-		/* Refresh system line message if it changed */
-		if(sysln)
-		{
-			SysLineEdit();
+    /* Loop */
+    while (run) {
+	/* Refresh system line message if it changed */
+	if (sysln) {
+	    SysLineEdit();
 
-			sysln = 0;
-		}
+	    sysln = 0;
+	}
 
-		/* Print clipboard status */
-		CrtLocate(PS_ROW, PS_CLP);
+	/* Print clipboard status */
+	CrtLocate(PS_ROW, PS_CLP);
 
 #if OPT_BLOCK
 
@@ -428,108 +414,108 @@ TRACE("Loop");
 
 #endif
 
-		/* Print current line number, etc. */
-		CrtLocate(PS_ROW, PS_LIN_CUR); putint("%04d", lp_cur + 1);
-		CrtLocate(PS_ROW, PS_LIN_NOW); putint("%04d", lp_now);
+	/* Print current line number, etc. */
+	CrtLocate(PS_ROW, PS_LIN_CUR);
+	putint("%04d", lp_cur + 1);
+	CrtLocate(PS_ROW, PS_LIN_NOW);
+	putint("%04d", lp_now);
 
-		/* Edit the line */
-		ch = BfEdit();
+	/* Edit the line */
+	ch = BfEdit();
 
-		/* Note: BfEdit() does previous checks for following
-		   actions, to not waste time when an action is not
-		   possible */
+	/* Note: BfEdit() does previous checks for following
+	   actions, to not waste time when an action is not
+	   possible */
 
-		/* Check returned control character */
-		switch(ch)
-		{
-			case K_UP :    /* Up one line --------------------- */
-				LoopUp();
-				break;
-			case K_DOWN :  /* Down one line ------------------- */
-				LoopDown();
-				break;
-			case K_CR :    /* Insert CR ----------------------- */
-				LoopCr();
-				break;
-			case K_LDEL :  /* Delete CR on the left ----------- */
-				LoopLeftDel();
-				break;
-			case K_RDEL :  /* Delete CR on the right ---------- */
-				LoopRightDel();
-				break;
-			case K_PGUP :  /* Page up ------------------------- */
-				LoopPgUp();
-				break;
-			case K_PGDOWN :/* Page down ----------------------- */
-				LoopPgDown();
-				break;
-			case K_TOP :   /* Top of document ----------------- */
-				LoopTop();
-				break;
-			case K_BOTTOM :/* Bottom of document -------------- */
-				LoopBottom();
-				break;
-			case K_COPY :   /* Copy line or block ------------- */
-				LoopCopy();
-				break;
-			case K_CUT :    /* Copy and delete line or block -- */
-				LoopCut();
-				break;
-			case K_PASTE :  /* Paste line or block ------------ */
-				LoopPaste();
-				break;
-			case K_DELETE : /* Delete line or block ----------- */
-				LoopDelete();
-				break;
-			case K_CLRCLP : /* Clear the clipboard ------------ */
-				LoopClrClp();
-				break;
+	/* Check returned control character */
+	switch (ch) {
+	case K_UP:		/* Up one line --------------------- */
+	    LoopUp();
+	    break;
+	case K_DOWN:		/* Down one line ------------------- */
+	    LoopDown();
+	    break;
+	case K_CR:		/* Insert CR ----------------------- */
+	    LoopCr();
+	    break;
+	case K_LDEL:		/* Delete CR on the left ----------- */
+	    LoopLeftDel();
+	    break;
+	case K_RDEL:		/* Delete CR on the right ---------- */
+	    LoopRightDel();
+	    break;
+	case K_PGUP:		/* Page up ------------------------- */
+	    LoopPgUp();
+	    break;
+	case K_PGDOWN:		/* Page down ----------------------- */
+	    LoopPgDown();
+	    break;
+	case K_TOP:		/* Top of document ----------------- */
+	    LoopTop();
+	    break;
+	case K_BOTTOM:		/* Bottom of document -------------- */
+	    LoopBottom();
+	    break;
+	case K_COPY:		/* Copy line or block ------------- */
+	    LoopCopy();
+	    break;
+	case K_CUT:		/* Copy and delete line or block -- */
+	    LoopCut();
+	    break;
+	case K_PASTE:		/* Paste line or block ------------ */
+	    LoopPaste();
+	    break;
+	case K_DELETE:		/* Delete line or block ----------- */
+	    LoopDelete();
+	    break;
+	case K_CLRCLP:		/* Clear the clipboard ------------ */
+	    LoopClrClp();
+	    break;
 
 #if OPT_BLOCK
-			case K_BLK_START : /* Set block start ------------- */
-				LoopBlkStart();
-				break;
-			case K_BLK_END :   /* Set block end --------------- */
-				LoopBlkEnd();
-				break;
-			case K_BLK_UNSET : /* Unset block ----------------- */
-				LoopBlkUnset();
-				break;
+	case K_BLK_START:	/* Set block start ------------- */
+	    LoopBlkStart();
+	    break;
+	case K_BLK_END:	/* Set block end --------------- */
+	    LoopBlkEnd();
+	    break;
+	case K_BLK_UNSET:	/* Unset block ----------------- */
+	    LoopBlkUnset();
+	    break;
 #endif
 
 #if OPT_FIND
-			case K_FIND :  /* Find string --------------------- */
-				LoopFindFirst();
-				break;
-			case K_NEXT :  /* Find next string ---------------- */
-				LoopFindNext();
-				break;
+	case K_FIND:		/* Find string --------------------- */
+	    LoopFindFirst();
+	    break;
+	case K_NEXT:		/* Find next string ---------------- */
+	    LoopFindNext();
+	    break;
 #endif
 
 #if OPT_GOTO
-			case K_GOTO :  /* Go to line # -------------------- */
-				LoopGoLine();
-				break;
+	case K_GOTO:		/* Go to line # -------------------- */
+	    LoopGoLine();
+	    break;
 #endif
 
 
 #if OPT_MACRO
-			case K_MACRO : /* Execute macro from file --------- */
-				LoopMacro();
-				break;
+	case K_MACRO:		/* Execute macro from file --------- */
+	    LoopMacro();
+	    break;
 #endif
 
-			case K_ESC :   /* Show the menu ------------------- */
-				if(Menu()) {
-					run = 0;
-				}
-				else {
-					ShowFilename(); /* Refresh filename */
-					RefreshAll();   /* Refresh editor box */
-				}
-				break;
-		}
+	case K_ESC:		/* Show the menu ------------------- */
+	    if (Menu()) {
+		run = 0;
+	    } else {
+		ShowFilename();	/* Refresh filename */
+		RefreshAll();	/* Refresh editor box */
+	    }
+	    break;
 	}
+    }
 }
 
 /* Go one line up
@@ -537,13 +523,13 @@ TRACE("Loop");
 */
 void LoopUp()
 {
-TRACE("LoopUp");
-	--lp_cur; // FIXME -- check if we are on the 1st line?
+    TRACE("LoopUp");
+    --lp_cur;			// FIXME -- check if we are on the 1st line?
 
-	if(box_shr)
-		--box_shr;
-	else
-		Refresh(0, lp_cur);
+    if (box_shr)
+	--box_shr;
+    else
+	Refresh(0, lp_cur);
 }
 
 /* Go one line down
@@ -551,13 +537,13 @@ TRACE("LoopUp");
 */
 void LoopDown()
 {
-TRACE("LoopDown");
-	++lp_cur; // FIXME -- check if we are on the last line?
+    TRACE("LoopDown");
+    ++lp_cur;			// FIXME -- check if we are on the last line?
 
-	if(box_shr < box_rows - 1)
-		++box_shr;
-	else
-		Refresh(0, lp_cur - box_rows + 1);
+    if (box_shr < box_rows - 1)
+	++box_shr;
+    else
+	Refresh(0, lp_cur - box_rows + 1);
 }
 
 /* Go to document top
@@ -565,16 +551,16 @@ TRACE("LoopDown");
 */
 void LoopTop()
 {
-TRACE("LoopTop");
-	int first;
+    TRACE("LoopTop");
+    int first;
 
-	first = GetFirstLine();
+    first = GetFirstLine();
 
-	lp_cur = box_shr = box_shc = 0;
+    lp_cur = box_shr = box_shc = 0;
 
-	if(first > 0) {
-		RefreshAll();
-	}
+    if (first > 0) {
+	RefreshAll();
+    }
 }
 
 /* Go to document bottom
@@ -582,22 +568,21 @@ TRACE("LoopTop");
 */
 void LoopBottom()
 {
-TRACE("LoopBottom");
-	int first, last;
+    TRACE("LoopBottom");
+    int first, last;
 
-	first = GetFirstLine();
-	last = GetLastLine();
+    first = GetFirstLine();
+    last = GetLastLine();
 
-	lp_cur = lp_now - 1;
-	box_shc = 999;
+    lp_cur = lp_now - 1;
+    box_shc = 999;
 
-	if(last < lp_now - 1) {
-		box_shr = box_rows - 1;
-		RefreshAll();
-	}
-	else {
-		box_shr = last - first;
-	}
+    if (last < lp_now - 1) {
+	box_shr = box_rows - 1;
+	RefreshAll();
+    } else {
+	box_shr = last - first;
+    }
 }
 
 /* Page up
@@ -605,22 +590,21 @@ TRACE("LoopBottom");
 */
 void LoopPgUp()
 {
-TRACE("LoopPgUp");
-	int first, to;
+    TRACE("LoopPgUp");
+    int first, to;
 
-	first = GetFirstLine();
+    first = GetFirstLine();
 
-	if(first)
-	{
-		if((to = first - box_rows) < 0) /* max(to, 0) */
-			to = 0;
+    if (first) {
+	if ((to = first - box_rows) < 0)	/* max(to, 0) */
+	    to = 0;
 
-		lp_cur = to; box_shr = box_shc = 0;
+	lp_cur = to;
+	box_shr = box_shc = 0;
 
-		RefreshAll();
-	}
-	else
-		LoopTop();
+	RefreshAll();
+    } else
+	LoopTop();
 }
 
 /* Page down
@@ -628,22 +612,21 @@ TRACE("LoopPgUp");
 */
 void LoopPgDown()
 {
-TRACE("LoopPgDown");
-	int to;
+    TRACE("LoopPgDown");
+    int to;
 
-	if(GetLastLine() < lp_now - 1)
-	{
-		to = GetFirstLine() + box_rows;
+    if (GetLastLine() < lp_now - 1) {
+	to = GetFirstLine() + box_rows;
 
-		if(to >= lp_now)
-			to = lp_now - 1;
+	if (to >= lp_now)
+	    to = lp_now - 1;
 
-		lp_cur = to; box_shr = box_shc = 0;
+	lp_cur = to;
+	box_shr = box_shc = 0;
 
-		RefreshAll();
-	}
-	else
-		LoopBottom();
+	RefreshAll();
+    } else
+	LoopBottom();
 }
 
 /* Insert CR
@@ -651,80 +634,77 @@ TRACE("LoopPgDown");
 */
 void LoopCr()
 {
-TRACE("LoopCr");
-	int ok;
-	int i, k;
-	
-	if(box_shc) {
-		if(ln_dat[box_shc]) {
-			/* Cursor is in the middle of the line */
-			if((ok = SplitLine(lp_cur, box_shc))) {
-				CrtClearEol();
-			}
-		}
-		else {
-			/* Cursor is at the end of the line */
-			ok = AppendLine(lp_cur, NULL);
-		}
+    TRACE("LoopCr");
+    int ok;
+    int i, k;
+
+    if (box_shc) {
+	if (ln_dat[box_shc]) {
+	    /* Cursor is in the middle of the line */
+	    if ((ok = SplitLine(lp_cur, box_shc))) {
+		CrtClearEol();
+	    }
+	} else {
+	    /* Cursor is at the end of the line */
+	    ok = AppendLine(lp_cur, NULL);
 	}
-	else {
-		/* Cursor is in first column */
-		if((ok = InsertLine(lp_cur, NULL))) {
-			if(ln_dat[0]) {
-				/* Line is not empty */
-				CrtClearEol();
-			}
-			/* else { */
-				/* Line is empty */
-			/* } */
+    } else {
+	/* Cursor is in first column */
+	if ((ok = InsertLine(lp_cur, NULL))) {
+	    if (ln_dat[0]) {
+		/* Line is not empty */
+		CrtClearEol();
+	    }
+	    /* else { */
+	    /* Line is empty */
+	    /* } */
+	}
+    }
+
+    if (ok) {
+
+	++lp_cur;
+
+	k = 0;
+
+	if (box_shc) {
+
+	    i = 0;
+
+	    if (cf_indent) {
+		while (ln_dat[i] == ' ') {
+		    ++i;
 		}
+	    }
+
+	    if (cf_list) {
+		if (strchr(cf_list_chr, ln_dat[i]) && ln_dat[i + 1] == ' ') {
+		    i += 2;
+		}
+	    }
+
+	    if (i) {
+		k = i;
+
+		strcpy(ln_dat + i, lp_arr[lp_cur]);
+
+		ModifyLine(lp_cur, ln_dat);
+	    }
 	}
 
-	if(ok) {
+	if (box_shr < box_rows - 1) {
 
-		++lp_cur;
-		
-		k = 0;
-		
-		if(box_shc) {
-			
-			i = 0;
-			
-			if(cf_indent) {
-				while(ln_dat[i] == ' ') {
-					++i;
-				}
-			}
+	    ++box_shr;
 
-			if(cf_list) {
-				if(strchr(cf_list_chr, ln_dat[i]) && ln_dat[i + 1] == ' ') {
-					i += 2;
-				}
-			}
-
-			if(i) {
-				k = i;
-				
-				strcpy(ln_dat + i, lp_arr[lp_cur]);
-
-				ModifyLine(lp_cur, ln_dat);
-			}
-		}
-
-		if(box_shr < box_rows - 1) {
-
-			++box_shr;
-
-			Refresh(box_shr, lp_cur);
-		}
-		else {
-			Refresh(0, lp_cur - box_rows + 1);
-		}
-
-		box_shc = k;
-
-		lp_chg = 1;
+	    Refresh(box_shr, lp_cur);
+	} else {
+	    Refresh(0, lp_cur - box_rows + 1);
 	}
+
+	box_shc = k;
+
+	lp_chg = 1;
+    }
 }
 
 #if OPT_BLOCK
@@ -734,18 +714,18 @@ TRACE("LoopCr");
 */
 void LoopBlkStart()
 {
-TRACE("LoopBlkStart");
-	if(blk_start != -1 || (blk_end != -1 && lp_cur > blk_end)) {
-		LoopBlkUnset();
-	}
+    TRACE("LoopBlkStart");
+    if (blk_start != -1 || (blk_end != -1 && lp_cur > blk_end)) {
+	LoopBlkUnset();
+    }
 
-	blk_start = lp_cur;
+    blk_start = lp_cur;
 
-	if(blk_end != -1) {
-		RefreshBlock(box_shr, 1);
+    if (blk_end != -1) {
+	RefreshBlock(box_shr, 1);
 
-		blk_count = blk_end - blk_start + 1;
-	}
+	blk_count = blk_end - blk_start + 1;
+    }
 }
 
 /* Set block end
@@ -753,18 +733,18 @@ TRACE("LoopBlkStart");
 */
 void LoopBlkEnd()
 {
-TRACE("LoopBlkEnd");
-	if(blk_end != -1 || (blk_start != -1 && lp_cur < blk_start) ) {
-		LoopBlkUnset();
-	}
+    TRACE("LoopBlkEnd");
+    if (blk_end != -1 || (blk_start != -1 && lp_cur < blk_start)) {
+	LoopBlkUnset();
+    }
 
-	blk_end = lp_cur;
+    blk_end = lp_cur;
 
-	if(blk_start != -1) {
-		RefreshBlock(0, 1);  // FIXME -- optimize
+    if (blk_start != -1) {
+	RefreshBlock(0, 1);	// FIXME -- optimize
 
-		blk_count = blk_end - blk_start + 1;
-	}
+	blk_count = blk_end - blk_start + 1;
+    }
 }
 
 /* Unset block
@@ -772,24 +752,24 @@ TRACE("LoopBlkEnd");
 */
 void LoopBlkUnset()
 {
-TRACE("LoopBlkUnset");
-	if(blk_count) {
-		if(blk_start <= GetLastLine() && blk_end >= GetFirstLine()) {
-			RefreshBlock(0, 0);  // FIXME -- optimize
-		}
+    TRACE("LoopBlkUnset");
+    if (blk_count) {
+	if (blk_start <= GetLastLine() && blk_end >= GetFirstLine()) {
+	    RefreshBlock(0, 0);	// FIXME -- optimize
 	}
+    }
 
-	blk_start = blk_end = -1;
-	blk_count = 0;
+    blk_start = blk_end = -1;
+    blk_count = 0;
 }
 
 void LoopBlkEx()
 {
-TRACE("LoopBlkEx");
-	if(!blk_count) {
-		blk_start = blk_end = lp_cur;
-		blk_count = 1;
-	}
+    TRACE("LoopBlkEx");
+    if (!blk_count) {
+	blk_start = blk_end = lp_cur;
+	blk_count = 1;
+    }
 }
 
 #endif
@@ -800,18 +780,18 @@ TRACE("LoopBlkEx");
 void LoopCopy()
 {
 
-TRACE("LoopCopy");
+    TRACE("LoopCopy");
 #if OPT_BLOCK
 
-	LoopBlkEx();
-	
-	if(LoopCopyEx()) {
-		LoopBlkUnset();
-	}
+    LoopBlkEx();
+
+    if (LoopCopyEx()) {
+	LoopBlkUnset();
+    }
 
 #else
 
-	strcpy(clp_line, ln_dat);
+    strcpy(clp_line, ln_dat);
 
 #endif
 
@@ -821,29 +801,28 @@ TRACE("LoopCopy");
 
 LoopCopyEx()
 {
-	int i;
-TRACE("LoopCopyEx");
+    int i;
+    TRACE("LoopCopyEx");
 
-	LoopClrClp();
+    LoopClrClp();
 
-	if((clp_arr = (WORD *)AllocMem(blk_count * sizeof(char *)))) {
-		for(i = 0; i < blk_count; ++i) {
-			if((clp_arr[i] = AllocMem(strlen(lp_arr[blk_start + i]) + 1))) {
-				strcpy(clp_arr[i], lp_arr[blk_start + i]);
-			}
-			else {
-				FreeArray(clp_arr, i, 1);
+    if ((clp_arr = (WORD *) AllocMem(blk_count * sizeof(char *)))) {
+	for (i = 0; i < blk_count; ++i) {
+	    if ((clp_arr[i] = AllocMem(strlen(lp_arr[blk_start + i]) + 1))) {
+		strcpy(clp_arr[i], lp_arr[blk_start + i]);
+	    } else {
+		FreeArray(clp_arr, i, 1);
 
-				return 0;
-			}
-		}
-
-		clp_count = blk_count;
-
-		return 1;
+		return 0;
+	    }
 	}
 
-	return 0;
+	clp_count = blk_count;
+
+	return 1;
+    }
+
+    return 0;
 }
 
 #endif
@@ -854,26 +833,25 @@ TRACE("LoopCopyEx");
 void LoopDelete()
 {
 
-TRACE("LoopDelete");
+    TRACE("LoopDelete");
 #if OPT_BLOCK
 
-	LoopBlkEx();
-	LoopDeleteEx();
-	
+    LoopBlkEx();
+    LoopDeleteEx();
+
 #else
 
-	if(lp_cur != lp_now - 1) {
-			DeleteLine(lp_cur);
-	}
-	else {
-		ClearLine(lp_cur);
-	}
+    if (lp_cur != lp_now - 1) {
+	DeleteLine(lp_cur);
+    } else {
+	ClearLine(lp_cur);
+    }
 
-	Refresh(box_shr, lp_cur);
+    Refresh(box_shr, lp_cur);
 
-	box_shc = 0;
+    box_shc = 0;
 
-	lp_chg = 1;
+    lp_chg = 1;
 
 #endif
 
@@ -883,30 +861,29 @@ TRACE("LoopDelete");
 
 void LoopDeleteEx()
 {
-TRACE("LoopDeleteEx");
-	//if(blk_count) {
-		LoopGo(blk_start);
+    TRACE("LoopDeleteEx");
+    //if(blk_count) {
+    LoopGo(blk_start);
 
-		while(blk_count--) {
-			if(blk_start != lp_now - 1) {
-				DeleteLine(blk_start);
-			}
-			else {
-				ClearLine(blk_start);
-			}
+    while (blk_count--) {
+	if (blk_start != lp_now - 1) {
+	    DeleteLine(blk_start);
+	} else {
+	    ClearLine(blk_start);
+	}
 
-			--blk_end;
+	--blk_end;
 
-			Refresh(box_shr, lp_cur);
-		}
+	Refresh(box_shr, lp_cur);
+    }
 
-		blk_start = blk_end = -1;
-		blk_count = 0;
+    blk_start = blk_end = -1;
+    blk_count = 0;
 
-		box_shc = 0;
+    box_shc = 0;
 
-		lp_chg = 1;
-	//}
+    lp_chg = 1;
+    //}
 }
 
 #endif
@@ -917,20 +894,20 @@ TRACE("LoopDeleteEx");
 void LoopCut()
 {
 
-TRACE("LoopCut");
+    TRACE("LoopCut");
 #if OPT_BLOCK
 
-	LoopBlkEx();
-	
-	if(LoopCopyEx()) {
-		LoopDeleteEx();
-	}
+    LoopBlkEx();
+
+    if (LoopCopyEx()) {
+	LoopDeleteEx();
+    }
 
 #else
 
-	strcpy(clp_line, ln_dat);
+    strcpy(clp_line, ln_dat);
 
-	LoopDelete();
+    LoopDelete();
 
 #endif
 
@@ -944,36 +921,35 @@ void LoopPaste()
 
 #if OPT_BLOCK
 
-	int i;
-TRACE("LoopPaste");
+    int i;
+    TRACE("LoopPaste");
 
-	if(clp_count) {
-		for(i = 0; i < clp_count; ++i) {
-			if(InsertLine(lp_cur, clp_arr[i])) {
-				Refresh(box_shr, lp_cur);
-				LoopDown();
-			}
-			else {
-				break;
-			}
-		}
-
-		box_shc = 0;
-
-		lp_chg = 1;
+    if (clp_count) {
+	for (i = 0; i < clp_count; ++i) {
+	    if (InsertLine(lp_cur, clp_arr[i])) {
+		Refresh(box_shr, lp_cur);
+		LoopDown();
+	    } else {
+		break;
+	    }
 	}
+
+	box_shc = 0;
+
+	lp_chg = 1;
+    }
 
 #else
 
-	if((InsertLine(lp_cur, clp_line))) {
-		Refresh(box_shr, lp_cur);
-		LoopDown();
+    if ((InsertLine(lp_cur, clp_line))) {
+	Refresh(box_shr, lp_cur);
+	LoopDown();
 
-		box_shc = 0;
+	box_shc = 0;
 
-		lp_chg = 1;
+	lp_chg = 1;
 
-	}
+    }
 
 #endif
 
@@ -985,18 +961,18 @@ TRACE("LoopPaste");
 void LoopClrClp()
 {
 
-TRACE("LoopClrClp");
+    TRACE("LoopClrClp");
 #if OPT_BLOCK
 
-	if(clp_count) {
-		FreeArray(clp_arr, clp_count, 1);
+    if (clp_count) {
+	FreeArray(clp_arr, clp_count, 1);
 
-		clp_count = 0;
-	}
+	clp_count = 0;
+    }
 
 #else
 
-	*clp_line = '\0';
+    *clp_line = '\0';
 
 #endif
 
@@ -1007,60 +983,57 @@ TRACE("LoopClrClp");
 */
 void LoopLeftDel()
 {
-	char *p;
-	int ok, rs, pos;
-TRACE("LoopLeftDel");
+    char *p;
+    int ok, rs, pos;
+    TRACE("LoopLeftDel");
 
-	if(ln_dat[0]) {
-		/* Line is not empty */
-		
-		p = (char *)lp_arr[lp_cur - 1];
+    if (ln_dat[0]) {
+	/* Line is not empty */
 
-		if(*p) {
-			/* Previous line is not empty */
-			
-			pos = strlen(p);
+	p = (char *) lp_arr[lp_cur - 1];
 
-			if((ok = JoinLines(lp_cur - 1))) {
-				rs = 0;
-			}
-		}
-		else {
-			/* Previous line is empty */
-			
-			if((ok = DeleteLine(lp_cur - 1))) {
-				rs = 0;
-				pos = 0;
-			}
-		}
+	if (*p) {
+	    /* Previous line is not empty */
+
+	    pos = strlen(p);
+
+	    if ((ok = JoinLines(lp_cur - 1))) {
+		rs = 0;
+	    }
+	} else {
+	    /* Previous line is empty */
+
+	    if ((ok = DeleteLine(lp_cur - 1))) {
+		rs = 0;
+		pos = 0;
+	    }
 	}
-	else {
-		/* Line is empty */
-		
-		if((ok = DeleteLine(lp_cur))) {
-			rs = 1;
-			pos = 999;
-		}
+    } else {
+	/* Line is empty */
+
+	if ((ok = DeleteLine(lp_cur))) {
+	    rs = 1;
+	    pos = 999;
+	}
+    }
+
+    if (ok) {
+
+	--lp_cur;
+
+	if (box_shr) {
+
+	    --box_shr;
+
+	    Refresh(box_shr + rs, lp_cur + rs);
+	} else {
+	    Refresh(0, lp_cur);
 	}
 
-	if(ok) {
+	box_shc = pos;
 
-		--lp_cur;
-
-		if(box_shr)	{
-
-			--box_shr;
-
-			Refresh(box_shr + rs, lp_cur + rs);
-		}
-		else {
-			Refresh(0, lp_cur);
-		}
-
-		box_shc = pos;
-
-		lp_chg = 1;
-	}
+	lp_chg = 1;
+    }
 }
 
 /* Delete CR on the right
@@ -1068,55 +1041,52 @@ TRACE("LoopLeftDel");
 */
 void LoopRightDel()
 {
-	char *p;
-	int ok, rs;
-TRACE("LoopRightDel");
-	
-	p = (char *)lp_arr[lp_cur + 1];
+    char *p;
+    int ok, rs;
+    TRACE("LoopRightDel");
 
-	if(ln_dat[0]) {
-		/* Line is not empty */
+    p = (char *) lp_arr[lp_cur + 1];
 
-		if(*p) {
-			/* Next line is not empty */
-			
-			if((ok = JoinLines(lp_cur))) {
-				rs = 0;
-			}
-		}
-		else {
-			/* Next line is empty */
-			
-			if((ok = DeleteLine(lp_cur + 1))) {
-				rs = 1;
-			}
-		}
+    if (ln_dat[0]) {
+	/* Line is not empty */
+
+	if (*p) {
+	    /* Next line is not empty */
+
+	    if ((ok = JoinLines(lp_cur))) {
+		rs = 0;
+	    }
+	} else {
+	    /* Next line is empty */
+
+	    if ((ok = DeleteLine(lp_cur + 1))) {
+		rs = 1;
+	    }
 	}
-	else {
-		/* Line is empty */
-		
-		if((ok = DeleteLine(lp_cur))) {
+    } else {
+	/* Line is empty */
 
-			if(*p) {
-				/* Next line is not empty */
-				
-				rs = 0;
-			}
-			else {
-				/* Next line is empty */
-				
-				rs = 1;
-			}
-		}
+	if ((ok = DeleteLine(lp_cur))) {
+
+	    if (*p) {
+		/* Next line is not empty */
+
+		rs = 0;
+	    } else {
+		/* Next line is empty */
+
+		rs = 1;
+	    }
+	}
+    }
+
+    if (ok) {
+	if (box_shr + rs < box_rows) {
+	    Refresh(box_shr + rs, lp_cur + rs);
 	}
 
-	if(ok) {
-		if(box_shr + rs < box_rows) {
-			Refresh(box_shr + rs, lp_cur + rs);
-		}
-
-		lp_chg = 1;
-	}
+	lp_chg = 1;
+    }
 }
 
 #if OPT_FIND
@@ -1126,41 +1096,39 @@ TRACE("LoopRightDel");
 */
 LoopFind()
 {
-	int slen, flen, line, row, col, i;
-	char *p;
-TRACE("LoopFind");
+    int slen, flen, line, row, col, i;
+    char *p;
+    TRACE("LoopFind");
 
-	row  = box_shr;
-	col  = box_shc;
-	flen = strlen(find_str);
+    row = box_shr;
+    col = box_shc;
+    flen = strlen(find_str);
 
-	for(line = lp_cur; line < lp_now; ++line)
-	{
-		for(slen = strlen((p = (char *)lp_arr[line])); flen <= (slen - col) && col < slen; ++col)
-		{
-			for(i = 0; i < flen && find_str[i] == p[col + i]; ++i)
-				;
+    for (line = lp_cur; line < lp_now; ++line) {
+	for (slen = strlen((p = (char *) lp_arr[line]));
+	     flen <= (slen - col) && col < slen; ++col) {
+	    for (i = 0; i < flen && find_str[i] == p[col + i]; ++i);
 
-			if(i == flen)
-			{
-				/* Found, set new cursor position and refresh the screen if needed */
-				lp_cur = line;
-				box_shc = col;
+	    if (i == flen) {
+		/* Found, set new cursor position and refresh the screen if needed */
+		lp_cur = line;
+		box_shc = col;
 
-				if(row < box_rows)
-					box_shr = row;
-				else
-					Refresh((box_shr = 0), lp_cur);
+		if (row < box_rows)
+		    box_shr = row;
+		else
+		    Refresh((box_shr = 0), lp_cur);
 
-				return 1;
-			}
-		}
-
-		++row; col = 0;
+		return 1;
+	    }
 	}
 
-	/* Not found */
-	return 0;
+	++row;
+	col = 0;
+    }
+
+    /* Not found */
+    return 0;
 }
 
 /* Find first string
@@ -1168,14 +1136,13 @@ TRACE("LoopFind");
 */
 LoopFindFirst()
 {
-TRACE("LoopFindFirst");
-	find_str[0] = '\0';
+    TRACE("LoopFindFirst");
+    find_str[0] = '\0';
 
-	if(SysLineStr("Find", find_str, FIND_MAX - 1))
-	{
-		return (LoopFind());
-	}
-	return 0;
+    if (SysLineStr("Find", find_str, FIND_MAX - 1)) {
+	return (LoopFind());
+    }
+    return 0;
 }
 
 /* Find next string
@@ -1183,21 +1150,20 @@ TRACE("LoopFindFirst");
 */
 void LoopFindNext()
 {
-	int old_box_shc;
+    int old_box_shc;
 
-TRACE("LoopFindNext");
-	if(find_str[0])
-	{
-		old_box_shc = box_shc;
+    TRACE("LoopFindNext");
+    if (find_str[0]) {
+	old_box_shc = box_shc;
 
-		/* Skip current character */
-		if(box_shc < strlen(lp_arr[lp_cur]))
-			++box_shc;
+	/* Skip current character */
+	if (box_shc < strlen(lp_arr[lp_cur]))
+	    ++box_shc;
 
-		/* Set old cursor position on find failure */
-		if(!LoopFind())
-			box_shc = old_box_shc;
-	}
+	/* Set old cursor position on find failure */
+	if (!LoopFind())
+	    box_shc = old_box_shc;
+    }
 }
 
 #endif
@@ -1209,34 +1175,32 @@ TRACE("LoopFindNext");
 */
 void LoopGoLine()
 {
-	char buf[6];
-	int line, first, last;
+    char buf[6];
+    int line, first, last;
 
-TRACE("LoopGoLine");
-	buf[0] = '\0';
+    TRACE("LoopGoLine");
+    buf[0] = '\0';
 
-	if(SysLineStr("Go to line #", buf, 5))
-	{
-		line = atoi(buf);
+    if (SysLineStr("Go to line #", buf, 5)) {
+	line = atoi(buf);
 
-		if(line > 0 && line <= lp_now)
-		{
-			/*
-			first = GetFirstLine();
-			last = GetLastLine();
+	if (line > 0 && line <= lp_now) {
+	    /*
+	       first = GetFirstLine();
+	       last = GetLastLine();
 
-			lp_cur = line - 1;
-			box_shc = 0;
+	       lp_cur = line - 1;
+	       box_shc = 0;
 
-			if(lp_cur >= first && lp_cur <= last)
-				box_shr = lp_cur - first;
-			else
-				Refresh((box_shr = 0), lp_cur);
-			*/
+	       if(lp_cur >= first && lp_cur <= last)
+	       box_shr = lp_cur - first;
+	       else
+	       Refresh((box_shr = 0), lp_cur);
+	     */
 
-			LoopGo(line - 1);
-		}
+	    LoopGo(line - 1);
 	}
+    }
 }
 
 #endif
@@ -1247,19 +1211,19 @@ TRACE("LoopGoLine");
 void LoopGo(line)
 int line;
 {
-	int first, last;
+    int first, last;
 
-TRACE("LoopGo");
-	first = GetFirstLine();
-	last = GetLastLine();
+    TRACE("LoopGo");
+    first = GetFirstLine();
+    last = GetLastLine();
 
-	lp_cur = line;
-	box_shc = 0;
+    lp_cur = line;
+    box_shc = 0;
 
-	if(lp_cur >= first && lp_cur <= last)
-		box_shr = lp_cur - first;
-	else
-		Refresh((box_shr = 0), lp_cur);
+    if (lp_cur >= first && lp_cur <= last)
+	box_shr = lp_cur - first;
+    else
+	Refresh((box_shr = 0), lp_cur);
 }
 
 #if OPT_MACRO
@@ -1269,26 +1233,23 @@ TRACE("LoopGo");
 */
 void LoopMacro()
 {
-	char fn[FILENAME_MAX];
-	int len_type;
+    char fn[FILENAME_LEN];
+    int len_type;
 
-TRACE("LoopMacro");
-	fn[0] = '\0';
+    TRACE("LoopMacro");
+    fn[0] = '\0';
 
-	if(SysLineStr("Macro", fn, FILENAME_MAX - 1))
-	{
-		len_type = (strchr(fn, '.') ? 0 : strlen(MAC_FTYPE));
+    if (SysLineStr("Macro", fn, FILENAME_LEN - 1)) {
+	len_type = (strchr(fn, '.') ? 0 : strlen(MAC_FTYPE));
 
-		if(len_type)
-		{
-			if(strlen(fn) + len_type < FILENAME_MAX)
-			{
-				strcat(fn, MAC_FTYPE);
-			}
-		}
-	
-		MacroRunFile(fn, 0);
+	if (len_type) {
+	    if (strlen(fn) + len_type < FILENAME_LEN) {
+		strcat(fn, MAC_FTYPE);
+	    }
 	}
+
+	MacroRunFile(fn, 0);
+    }
 }
 
 #endif
