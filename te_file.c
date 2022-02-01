@@ -208,7 +208,7 @@ char *fn;
 
     /* Write the file */
     for (i = 0; i < lp_now; ++i) {
-	if (fputs(lp_arr[i], fp) == EOF || fputc('\n', fp) == EOF) {
+	if (fputs(lp_arr[i], fp) == EOF || fputs("\r\n", fp) == EOF) {
 
 	    fclose(fp);
 	    remove(fn);

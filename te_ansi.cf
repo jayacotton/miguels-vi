@@ -13,7 +13,7 @@ screen.vertChar = |
 screen.horizChar = -
 screen.lineNumbersChar = |
 
-editor.maxLines = 512
+editor.maxLines = 3000 
 editor.tabSize = 4
 editor.lineNumbers = true
 editor.c_language = true
