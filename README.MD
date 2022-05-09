@@ -4,6 +4,10 @@ te
 NOTE:  This is a subset of Miguel Garcia's TE editor, this build is for
 I8080 with ANSI terminal.  For complete support goto www.floppysoftware.es
 
+About the Makefile.  I am using vcpm, a virtual cpm tool written in java.
+This can be obtained at https://github.com/durgadas311/cpnet-z80/tree/master/tools.
+Best to get the entire repo, its small, and extract the tools to your system.
+
 I have made this repo public with Miguel's permission with thanks to him.
 
 v1.73 / 20 Nov 2021 for CP/M
