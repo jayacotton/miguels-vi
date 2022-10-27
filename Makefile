@@ -5,7 +5,10 @@ CFLAGS  = +cpm -Wall -clib=8080 --list --c-code-in-asm -s -m -pragma-include:zpr
 LINKOP  = +cpm -create-app -clib=8080 -s -m -pragma-include:zpragma.inc
 CC = zcc
 
-all: te_ansi
+all: te_ansi tecf
+
+tecf: tecf.o
+	$(CC) $(LINKOP) -otecf tecf.o
 
 te_ansi: te_ansi.o
 	$(CC) $(LINKOP) -ote te_ansi.o
